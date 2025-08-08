@@ -24,7 +24,7 @@ const AboutPage = () => {
       <Navbar />
 
       {/* Hero with Gradient */}
-      <div className="bg-gradient-to-r from-green-700 to-emerald-800 py-16 md:py-24 text-white">
+      <div className="bg-gradient-to-r from-[#52bf51] to-emerald-700 py-20 md:py-24 text-white">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">About Our Consultancy</h1>
           <p className="text-lg md:text-xl opacity-90 max-w-3xl mx-auto">

@@ -63,18 +63,19 @@ export default function ServicesPage() {
       </Head>
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        {/* Hero Section */}
-        <section className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Our <span className="text-green-600">Services</span>
+      {/* Green Background Header Section */}
+      <div className="pt-24 pb-16 bg-green-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Our Services
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            Comprehensive solutions tailored to your Australian education and migration journey.
-            We provide end-to-end support from course selection to visa processing.
+          <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto">
+            Comprehensive solutions tailored to your Australian education and migration journey
           </p>
-        </section>
+        </div>
+      </div>
 
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 -mt-8">
         {/* Services Grid */}
         <section className="mb-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

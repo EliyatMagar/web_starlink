@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Navbar from "../components/Navbar"; // Make sure you have this
+import Navbar from "../components/Navbar";
 import { useState } from "react";
 
 export default function ContactPage() {
@@ -32,101 +32,161 @@ export default function ContactPage() {
 
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-12 text-gray-800">
-        {/* Page Header */}
-        <header className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-green-700">Contact Us</h1>
-          <p className="mt-2 text-gray-600">
-            We’re here to help you every step of the way.
+            {/* Green Background Header Section */}
+      <div className="pt-24 pb-16 bg-green-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+             Contact Us
+          </h1>
+          <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto">
+            We're here to help you every step of the way with your education and visa journey.
           </p>
-        </header>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Contact Information */}
-          <div>
-            <h2 className="text-2xl font-semibold text-green-600 mb-4">
-              Get in Touch
-            </h2>
-            <p className="mb-4">
-              Whether you have questions about visas, admissions, or our
-              services, our team is ready to assist you.
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 pt-24 pb-12">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Header */}
+          {/* <header className="text-center mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-green-800 mb-3">
+              Contact Us
+            </h1>
+            <p className="text-base sm:text-lg text-green-600 max-w-2xl mx-auto">
+              We're here to help you every step of the way with your education and visa journey.
             </p>
+          </header> */}
 
-            <div className="space-y-3">
-              <p>
-                📍 <strong>Tasmania Office:</strong> Rosetta, Tasmania – 7010,
-                Australia
+          {/* Reversed order on mobile: details first, then form */}
+          <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-12">
+            {/* Contact Information - Comes first on mobile */}
+            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 w-full lg:w-1/2">
+              <h2 className="text-xl sm:text-2xl font-bold text-green-700 mb-4 sm:mb-6">
+                Get in Touch
+              </h2>
+              <p className="mb-4 sm:mb-6 text-gray-700 text-sm sm:text-base">
+                Whether you have questions about visas, admissions, or our
+                services, our team is ready to assist you.
               </p>
-              <p>
-                📍 <strong>Sydney Office:</strong> Sydney, New South Wales –
-                Australia
-              </p>
-              <p>📧 Email: info@starlinkeducation.com</p>
-              <p>📞 Phone: +61 123 456 789</p>
+
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-0.5 sm:mt-1">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-xs sm:text-sm font-medium text-gray-900">Tasmania Office</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">Rosetta, Tasmania – 7010, Australia</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-0.5 sm:mt-1">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-xs sm:text-sm font-medium text-gray-900">Sydney Office</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">Sydney, New South Wales – Australia</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-0.5 sm:mt-1">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-xs sm:text-sm font-medium text-gray-900">Email</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">info@starlinkeducation.com</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-0.5 sm:mt-1">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-xs sm:text-sm font-medium text-gray-900">Phone</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">+61 123 456 789</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Form - Comes second on mobile */}
+            <div className="w-full lg:w-1/2">
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="p-6 sm:p-8">
+                  <h2 className="text-xl sm:text-2xl font-bold text-green-700 mb-4 sm:mb-6">
+                    Send Us a Message
+                  </h2>
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                    <div>
+                      <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="message" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                        Message
+                      </label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        rows="4"
+                        required
+                        className="w-full px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      ></textarea>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 sm:py-3 px-4 rounded-lg transition duration-200"
+                    >
+                      Send Message
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Contact Form */}
-          <div>
-            <h2 className="text-2xl font-semibold text-green-600 mb-4">
-              Send Us a Message
-            </h2>
-            <form
-              onSubmit={handleSubmit}
-              className="bg-white shadow-md rounded-lg p-6 border border-green-100"
-            >
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                  Message
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows="4"
-                  required
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-green-800 transition"
-              >
-                Send Message
-              </button>
-            </form>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </>
   );
 }
