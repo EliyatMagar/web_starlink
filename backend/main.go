@@ -14,12 +14,33 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
+
+func validateEnvVars() {
+	required := []string{
+		"ALLOWED_ORIGINS",
+		"ALLOWED_METHODS",
+		"ALLOWED_HEADERS",
+		"JWT_SECRET",
+		"DB_HOST",
+		"DB_USER",
+		"DB_PASSWORD",
+		"DB_NAME",
+	}
+
+	for _, key := range required {
+		if os.Getenv(key) == "" {
+			log.Fatalf("Required environment variable %s is not set", key)
+		}
+	}
+}
 
 func main() {
 	// Load environment variables
 	config.LoadEnv()
+	validateEnvVars()
 
 	// Initialize database
 	database.ConnectDB()
@@ -40,12 +61,51 @@ func main() {
 	// Create Gin router
 	router := gin.Default()
 
-	// Set trusted proxies (adjust according to your deployment)
-	trustedProxies := []string{}
-	if os.Getenv("TRUSTED_PROXIES") != "" {
-		trustedProxies = strings.Split(os.Getenv("TRUSTED_PROXIES"), ",")
+	// Request logging
+	router.Use(func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+		latency := time.Since(start)
+		log.Printf("%s %s %d %v", c.Request.Method, c.Request.URL.Path, c.Writer.Status(), latency)
+	})
+
+	// CORS configuration
+	if os.Getenv("GIN_MODE") != "release" {
+		router.Use(cors.New(cors.Config{
+			AllowOrigins:     []string{"*"},
+			AllowMethods:     []string{"*"},
+			AllowHeaders:     []string{"*"},
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+			MaxAge:           12 * time.Hour,
+		}))
+	} else {
+		router.Use(cors.New(cors.Config{
+			AllowOrigins:     strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","),
+			AllowMethods:     strings.Split(os.Getenv("ALLOWED_METHODS"), ","),
+			AllowHeaders:     strings.Split(os.Getenv("ALLOWED_HEADERS"), ","),
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+			MaxAge:           12 * time.Hour,
+		}))
 	}
-	router.SetTrustedProxies(trustedProxies)
+
+	// Health check
+	router.GET("/health", func(c *gin.Context) {
+		if err := database.DB.Ping(); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unhealthy"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
+	})
+
+	// Static files
+	router.Static("/uploads", "./uploads")
+
+	// Set trusted proxies
+	if trustedProxies := os.Getenv("TRUSTED_PROXIES"); trustedProxies != "" {
+		router.SetTrustedProxies(strings.Split(trustedProxies, ","))
+	}
 
 	// Setup routes
 	routes.AdminRoutes(router)

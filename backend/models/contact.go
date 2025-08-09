@@ -1,11 +1,14 @@
 package models
 
-import "time"
+// ContactRequest represents the incoming contact form data
+type ContactRequest struct {
+	Name    string `json:"name" binding:"required"`
+	Email   string `json:"email" binding:"required,email"`
+	Message string `json:"message" binding:"required"`
+}
 
-type ContactMessage struct {
-	ID        int       `db:"id" json:"id"`
-	Name      string    `db:"name" json:"name"`
-	Email     string    `db:"email" json:"email"`
-	Message   string    `db:"message" json:"message"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+// ContactResponse represents the API response
+type ContactResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }

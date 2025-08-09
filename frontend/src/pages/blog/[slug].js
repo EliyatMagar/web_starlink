@@ -1,62 +1,61 @@
-import { useRouter } from 'next/router';
-import { getBlogPosts, getBlogBySlug } from '../../lib/api';
-import Layout from '../../components/Layout';
-import ReactMarkdown from 'react-markdown';
-import formatDate from '../../utils/formatDate';
+import { useRouter } from "next/router";
+import Head from "next/head";
+import Navbar from "../../components/Navbar";
+import { useEffect, useState } from "react";
+import { blogApi, getImageUrl } from "../../utils/api";
 
-export async function getStaticPaths() {
-  const posts = await getBlogPosts();
-  
-  const paths = posts.map(post => ({
-    params: { slug: post.attributes.slug }
-  }));
-  
-  return { paths, fallback: 'blocking' };
-}
-
-export async function getStaticProps({ params }) {
-  const post = await getBlogBySlug(params.slug);
-  
-  if (!post) {
-    return {
-      notFound: true,
-    };
-  }
-  
-  return {
-    props: { post },
-    revalidate: 60,
-  };
-}
-
-export default function BlogPost({ post }) {
+export default function SingleBlogPage() {
   const router = useRouter();
-  
-  if (router.isFallback) {
-    return <div>Loading...</div>;
+  const { slug } = router.query; // slug = blog ID
+  const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!slug) return;
+    async function fetchBlog() {
+      try {
+        const data = await blogApi.getBlog(slug);
+        setBlog(data);
+      } catch (error) {
+        console.error("Error fetching blog:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchBlog();
+  }, [slug]);
+
+  if (loading) {
+    return <p className="text-center py-10 text-gray-500">Loading...</p>;
   }
-  
+
+  if (!blog) {
+    return <p className="text-center py-10 text-gray-500">Blog not found.</p>;
+  }
+
   return (
-    <Layout title={post.attributes.title}>
-      <article className="max-w-3xl mx-auto">
-        <img 
-          src={post.attributes.coverImage?.data?.attributes?.url} 
-          alt={post.attributes.title}
-          className="w-full h-64 object-cover rounded-lg mb-6"
+    <>
+      <Head>
+        <title>{blog.title} | Starlink Education</title>
+        <meta name="description" content={blog.excerpt || blog.content?.slice(0, 150)} />
+      </Head>
+      <Navbar />
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <img
+          src={getImageUrl(blog.image)}
+          alt={blog.title}
+          className="w-full h-80 object-cover rounded-lg shadow-md mb-6"
         />
-        
-        <h1 className="text-4xl font-bold mb-4">{post.attributes.title}</h1>
-        
-        <div className="flex items-center mb-8 text-gray-600">
-          <span>By {post.attributes.author?.data?.attributes?.name || 'Admin'}</span>
-          <span className="mx-2">•</span>
-          <span>{formatDate(post.attributes.publishedAt)}</span>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">{blog.title}</h1>
+        <div className="text-gray-500 text-sm mb-6">
+          {new Date(blog.createdAt).toLocaleDateString()}
         </div>
-        
-        <div className="prose max-w-none">
-          <ReactMarkdown>{post.attributes.content}</ReactMarkdown>
-        </div>
-      </article>
-    </Layout>
+        <div
+          className="prose max-w-none"
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+        />
+      </main>
+    </>
   );
 }

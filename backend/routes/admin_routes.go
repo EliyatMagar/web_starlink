@@ -2,7 +2,7 @@
 package routes
 
 import (
-	controllers "backend/controller"
+	"backend/controllers"
 	"backend/middleware"
 
 	"github.com/gin-gonic/gin"
