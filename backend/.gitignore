@@ -13,10 +13,7 @@ vendor/
 
 # Go workspace file
 go.work
-go.work.sum
 
-# Go modules
-go.sum
 
 # Logs
 *.log
