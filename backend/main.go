@@ -42,6 +42,10 @@ func main() {
 	config.LoadEnv()
 	validateEnvVars()
 
+	// Log environment variables for debugging
+	log.Printf("Allowed Origins: %v", strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","))
+	log.Printf("Server running in %s mode", os.Getenv("GIN_MODE"))
+
 	// Initialize database
 	database.ConnectDB()
 	defer func() {
@@ -61,7 +65,7 @@ func main() {
 	// Create Gin router
 	router := gin.Default()
 
-	// Request logging
+	// Request logging middleware
 	router.Use(func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
@@ -80,17 +84,32 @@ func main() {
 			MaxAge:           12 * time.Hour,
 		}))
 	} else {
+		// Trim spaces in env vars to prevent subtle CORS errors
+		allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
+		allowedMethods := strings.Split(os.Getenv("ALLOWED_METHODS"), ",")
+		allowedHeaders := strings.Split(os.Getenv("ALLOWED_HEADERS"), ",")
+
+		for i := range allowedOrigins {
+			allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
+		}
+		for i := range allowedMethods {
+			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
+		}
+		for i := range allowedHeaders {
+			allowedHeaders[i] = strings.TrimSpace(allowedHeaders[i])
+		}
+
 		router.Use(cors.New(cors.Config{
-			AllowOrigins:     strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","),
-			AllowMethods:     strings.Split(os.Getenv("ALLOWED_METHODS"), ","),
-			AllowHeaders:     strings.Split(os.Getenv("ALLOWED_HEADERS"), ","),
+			AllowOrigins:     allowedOrigins,
+			AllowMethods:     allowedMethods,
+			AllowHeaders:     allowedHeaders,
 			ExposeHeaders:    []string{"Content-Length"},
 			AllowCredentials: true,
 			MaxAge:           12 * time.Hour,
 		}))
 	}
 
-	// Health check
+	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {
 		if err := database.DB.Ping(); err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unhealthy"})
@@ -99,32 +118,34 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 	})
 
-	// Static files
+	// Serve static files from uploads folder
 	router.Static("/uploads", "./uploads")
 
-	// Set trusted proxies
+	// Set trusted proxies if configured
 	if trustedProxies := os.Getenv("TRUSTED_PROXIES"); trustedProxies != "" {
 		router.SetTrustedProxies(strings.Split(trustedProxies, ","))
 	}
 
-	// Setup routes
+	// Setup admin routes
 	routes.AdminRoutes(router)
 
-	// Configure server
+	// Get port from env or default to 8080
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
+	// Create HTTP server for graceful shutdown
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
 	}
 
-	// Graceful shutdown setup
+	// Channel to listen for OS signals for graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
+	// Run server in goroutine
 	go func() {
 		log.Printf("Server starting on port %s", port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -132,14 +153,15 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal
+	// Block until signal is received
 	<-quit
 	log.Println("Shutting down server...")
 
-	// Create shutdown context with timeout
+	// Create context with timeout for shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// Shutdown the server gracefully
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}

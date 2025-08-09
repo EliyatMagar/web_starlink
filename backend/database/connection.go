@@ -14,13 +14,19 @@ import (
 var DB *sqlx.DB
 
 func ConnectDB() {
+	sslmode := os.Getenv("DB_SSLMODE")
+	if sslmode == "" {
+		sslmode = "disable" // default to disable for local dev
+	}
+
 	dbURL := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
+		sslmode,
 	)
 
 	var err error
@@ -46,7 +52,6 @@ func ConnectDB() {
 	log.Println("Database connected successfully")
 }
 
-// Add this function to properly close the database connection
 func CloseDB() error {
 	if DB != nil {
 		return DB.Close()
