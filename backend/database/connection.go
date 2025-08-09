@@ -26,7 +26,7 @@ func ConnectDB() {
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
-		sslmode, // use the variable here, not the env call again
+		os.Getenv("DB_SSLMODE"),
 	)
 
 	var err error
