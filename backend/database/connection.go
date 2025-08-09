@@ -20,33 +20,38 @@ func ConnectDB() {
 	}
 
 	dbURL := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s sslrootcert=%s connect_timeout=10",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
-		os.Getenv("DB_SSLMODE"),
+		sslmode,
+		"https://letsencrypt.org/certs/isrgrootx1.pem", // Render's CA
 	)
+
+	// Debug logging
+	log.Printf("Connecting to PostgreSQL at: %s", os.Getenv("DB_HOST"))
 
 	var err error
 	DB, err = sqlx.Connect("postgres", dbURL)
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Printf("Connection failed. URL: postgres://%s@%s:%s/%s?sslmode=%s",
+			os.Getenv("DB_USER"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"),
+			os.Getenv("DB_NAME"), sslmode)
+		log.Fatal("Database connection error: ", err)
 	}
 
-	// Configure connection pool
+	// Pool settings (your existing code is good)
 	DB.SetMaxOpenConns(25)
 	DB.SetMaxIdleConns(25)
 	DB.SetConnMaxLifetime(5 * time.Minute)
 
-	// Test the connection
+	// Test connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	err = DB.PingContext(ctx)
-	if err != nil {
-		log.Fatal("Failed to ping database:", err)
+	if err := DB.PingContext(ctx); err != nil {
+		log.Fatal("Database ping failed: ", err)
 	}
 
 	log.Println("Database connected successfully")
