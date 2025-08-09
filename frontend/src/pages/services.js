@@ -19,37 +19,37 @@ export default function ServicesPage() {
       icon: <FaBriefcase className="text-green-600 text-2xl" />
     },
     { 
-      slug: "oshc-ovhc", 
+      slug: "oshc-ovhc-insurance", 
       title: "OSHC/OVHC Insurance", 
       description: "Comprehensive health cover solutions for students and visa holders in Australia.",
       icon: <FaShieldAlt className="text-green-600 text-2xl" />
     },
     { 
-      slug: "rpl", 
+      slug: "recognition-of-prior-learning", 
       title: "Recognition of Prior Learning", 
       description: "Get your work experience and skills formally recognized towards Australian qualifications.",
       icon: <FaCertificate className="text-green-600 text-2xl" />
     },
     { 
-      slug: "visa-485", 
+      slug: "visa-485-application", 
       title: "485 Visa Application", 
       description: "Professional assistance for your post-study work visa application process.",
       icon: <FaFileAlt className="text-green-600 text-2xl" />
     },
     { 
-      slug: "student-visa", 
+      slug: "student-visa-assistance", 
       title: "Student Visa Assistance", 
       description: "End-to-end support for your student visa application to ensure success.",
       icon: <FaFileAlt className="text-green-600 text-2xl" />
     },
     { 
-      slug: "sop-writing", 
+      slug: "sop-writing-assistance", 
       title: "SOP Writing Assistance", 
       description: "Expert help crafting compelling Statements of Purpose for your applications.",
       icon: <FaFileAlt className="text-green-600 text-2xl" />
     },
     { 
-      slug: "flight-assistance", 
+      slug: "flight-ticket-assistance", 
       title: "Flight Ticket Assistance", 
       description: "Support with booking the best flight options for your journey to Australia.",
       icon: <FaPlane className="text-green-600 text-2xl" />

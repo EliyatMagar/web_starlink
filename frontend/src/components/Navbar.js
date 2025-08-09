@@ -96,7 +96,7 @@ export default function Navbar() {
           ))}
           <Link
             href="/starlinktravel"
-            className="block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700 text-center"
+            className="block px-3 py-2 rounded-md text-base font-medium bg-[#52bf51] text-white hover:bg-green-700 text-center"
           >
             StarLink Travel
           </Link>

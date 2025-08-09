@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Footer from "@/components/Footer";
 
 export default function StarlinkTravels() {
   const form = useRef();
@@ -72,9 +73,11 @@ export default function StarlinkTravels() {
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Travel Information */}
-            <div className="hidden lg:block bg-white rounded-xl shadow-lg p-6 h-fit">
-              <h2 className="text-xl font-bold text-green-700 mb-4">
+            {/* Why Choose Starlink Travels? */}
+            <div
+              className="order-1 lg:order-none bg-white rounded-xl shadow-lg p-6 h-fit"
+            >
+              <h2 className="text-2xl sm:text-3xl font-bold text-green-700 mb-4">
                 Why Choose Starlink Travels?
               </h2>
               <ul className="space-y-4">
@@ -111,9 +114,7 @@ export default function StarlinkTravels() {
                 <h3 className="text-sm font-medium text-gray-900 mb-2">
                   Need immediate assistance?
                 </h3>
-                <p className="text-sm text-gray-600">
-                  Call us at: +61 123 456 789
-                </p>
+                <p className="text-sm text-gray-600">Call us at: +61 123 456 789</p>
                 <p className="text-sm text-gray-600">
                   Email: travel@starlinkeducation.com
                 </p>
@@ -121,7 +122,7 @@ export default function StarlinkTravels() {
             </div>
 
             {/* Travel Form */}
-            <div className="lg:col-span-2">
+            <div className="order-2 lg:col-span-2 lg:order-none">
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="p-6 sm:p-8">
                   <h2 className="text-xl sm:text-2xl font-bold text-green-700 mb-6">
@@ -183,7 +184,6 @@ export default function StarlinkTravels() {
                       />
                     </div>
 
-                    {/* Country of Departure */}
                     {/* Country of Departure */}
                     <div>
                       <label
@@ -298,6 +298,7 @@ export default function StarlinkTravels() {
           </div>
         </main>
       </div>
+      <Footer/>
     </>
   );
 }

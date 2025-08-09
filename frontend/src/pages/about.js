@@ -1,6 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 import { FaGraduationCap, FaGlobeAmericas, FaFileAlt, FaPlane, FaCheck } from "react-icons/fa";
 
@@ -219,6 +220,7 @@ const AboutPage = () => {
           </div>
         </section>
       </main>
+      <Footer/>
     </>
   );
 };
@@ -283,6 +285,7 @@ const OfficeCard = ({ location, address, hours, phone, image }) => {
       </div>
     </div>
   );
+  <Footer/>
 };
 
 export default AboutPage;
