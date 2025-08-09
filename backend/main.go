@@ -37,6 +37,14 @@ func validateEnvVars() {
 	}
 }
 
+func cleanupOrigins(origins []string) []string {
+	var cleaned []string
+	for _, origin := range origins {
+		cleaned = append(cleaned, strings.TrimSpace(strings.TrimRight(origin, "/")))
+	}
+	return cleaned
+}
+
 func main() {
 	// Load environment variables
 	config.LoadEnv()
@@ -65,12 +73,27 @@ func main() {
 	// Create Gin router
 	router := gin.Default()
 
-	// Request logging middleware
+	// Enhanced request logging middleware
 	router.Use(func(c *gin.Context) {
 		start := time.Now()
+		path := c.Request.URL.Path
+		query := c.Request.URL.RawQuery
+
 		c.Next()
+
 		latency := time.Since(start)
-		log.Printf("%s %s %d %v", c.Request.Method, c.Request.URL.Path, c.Writer.Status(), latency)
+		status := c.Writer.Status()
+		clientIP := c.ClientIP()
+		method := c.Request.Method
+
+		log.Printf("[GIN] %3d | %13v | %15s | %-7s %s%s",
+			status,
+			latency,
+			clientIP,
+			method,
+			path,
+			ternary(query != "", "?"+query, ""),
+		)
 	})
 
 	// CORS configuration
@@ -84,14 +107,10 @@ func main() {
 			MaxAge:           12 * time.Hour,
 		}))
 	} else {
-		// Trim spaces in env vars to prevent subtle CORS errors
-		allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
+		allowedOrigins := cleanupOrigins(strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","))
 		allowedMethods := strings.Split(os.Getenv("ALLOWED_METHODS"), ",")
 		allowedHeaders := strings.Split(os.Getenv("ALLOWED_HEADERS"), ",")
 
-		for i := range allowedOrigins {
-			allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
-		}
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
@@ -109,16 +128,52 @@ func main() {
 		}))
 	}
 
-	// Health check endpoint
-	router.GET("/health", func(c *gin.Context) {
-		if err := database.DB.Ping(); err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unhealthy"})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
+	// API Documentation Route
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"service": "Starlink API",
+			"version": "1.0",
+			"routes": gin.H{
+				"health":  "/health",
+				"admin":   "/api/admin",
+				"uploads": "/uploads",
+				"swagger": "/swagger/index.html",
+			},
+		})
 	})
 
-	// Serve static files from uploads folder
+	// Health check endpoint with DB verification
+	router.GET("/health", func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
+		if err := database.DB.PingContext(ctx); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"status":  "unhealthy",
+				"error":   err.Error(),
+				"details": "Database connection failed",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "healthy",
+			"details": "All systems operational",
+		})
+	})
+
+	// Setup API routes
+	api := router.Group("/api")
+	{
+		// Admin routes
+		routes.AdminRoutes(api)
+
+		// Add other route groups here
+		// routes.UserRoutes(api)
+		// routes.AuthRoutes(api)
+	}
+
+	// Serve static files (should come after API routes)
 	router.Static("/uploads", "./uploads")
 
 	// Set trusted proxies if configured
@@ -126,8 +181,10 @@ func main() {
 		router.SetTrustedProxies(strings.Split(trustedProxies, ","))
 	}
 
-	// Setup admin routes
-	routes.AdminRoutes(router)
+	// Print all registered routes
+	for _, route := range router.Routes() {
+		log.Printf("Registered Route: %-6s %s", route.Method, route.Path)
+	}
 
 	// Get port from env or default to 8080
 	port := os.Getenv("PORT")
@@ -141,7 +198,7 @@ func main() {
 		Handler: router,
 	}
 
-	// Channel to listen for OS signals for graceful shutdown
+	// Graceful shutdown setup
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -167,4 +224,12 @@ func main() {
 	}
 
 	log.Println("Server exited properly")
+}
+
+// Helper function for clean ternary operations
+func ternary(condition bool, trueVal, falseVal string) string {
+	if condition {
+		return trueVal
+	}
+	return falseVal
 }

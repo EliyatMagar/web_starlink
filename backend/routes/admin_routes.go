@@ -1,4 +1,3 @@
-// routes/admin_routes.go
 package routes
 
 import (
@@ -8,30 +7,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AdminRoutes(r *gin.Engine) {
-	api := r.Group("/api")
-
-	// Serve static files from uploads directory
-	api.Static("/uploads", "./uploads")
-
-	// Public routes
-	api.POST("/admin/signup", controllers.AdminSignup)
-	api.POST("/admin/login", controllers.AdminLogin)
-	api.GET("/blogs", controllers.GetBlogs)
-	api.GET("/blogs/:id", controllers.GetBlog)
-
-	// Protected admin routes
-	admin := api.Group("/admin")
-	admin.Use(middleware.RequireAuth)
+func AdminRoutes(r *gin.RouterGroup) {
+	// Public admin routes (no authentication required)
+	public := r.Group("/admin")
 	{
-		admin.GET("/dashboard", func(c *gin.Context) {
-			adminID := c.MustGet("adminID").(int)
-			c.JSON(200, gin.H{"message": "Welcome to admin dashboard", "adminID": adminID})
-		})
+		public.POST("/signup", controllers.AdminSignup)
+		public.POST("/login", controllers.AdminLogin)
+
+		// Blog viewing routes (public)
+		public.GET("/blogs", controllers.GetBlogs)
+		public.GET("/blogs/:id", controllers.GetBlog)
+	}
+
+	// Protected admin routes (require authentication)
+	protected := r.Group("/admin")
+	protected.Use(middleware.RequireAuth)
+	{
+		// Dashboard route
+		protected.GET("/dashboard", adminDashboard)
 
 		// Blog management routes
-		admin.POST("/blogs", controllers.CreateBlog)
-		admin.PUT("/blogs/:id", controllers.UpdateBlog)
-		admin.DELETE("/blogs/:id", controllers.DeleteBlog)
+		protected.POST("/blogs", controllers.CreateBlog)
+		protected.PUT("/blogs/:id", controllers.UpdateBlog)
+		protected.DELETE("/blogs/:id", controllers.DeleteBlog)
+
 	}
+}
+
+// adminDashboard handles the admin dashboard route
+func adminDashboard(c *gin.Context) {
+	adminID := c.MustGet("adminID").(int)
+	c.JSON(200, gin.H{
+		"message": "Welcome to admin dashboard",
+		"adminID": adminID,
+		"links": []gin.H{
+			{"description": "Manage blogs", "path": "/api/admin/blogs"},
+			{"description": "Manage users", "path": "/api/admin/users"},
+		},
+	})
 }

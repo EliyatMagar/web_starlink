@@ -14,47 +14,61 @@ import (
 var DB *sqlx.DB
 
 func ConnectDB() {
-	sslmode := os.Getenv("DB_SSLMODE")
-	if sslmode == "" {
-		sslmode = "disable" // default to disable for local dev
+	// Get environment variables with defaults
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		dbPort = "5432" // default PostgreSQL port
+	}
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	sslMode := os.Getenv("DB_SSLMODE")
+	if sslMode == "" {
+		sslMode = "require" // safer default for production
 	}
 
-	dbURL := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s sslrootcert=%s connect_timeout=10",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-		sslmode,
-		"https://letsencrypt.org/certs/isrgrootx1.pem", // Render's CA
-	)
+	// Two connection string formats - choose one:
 
-	// Debug logging
-	log.Printf("Connecting to PostgreSQL at: %s", os.Getenv("DB_HOST"))
+	// Option 1: URL format (recommended)
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		dbUser,
+		dbPassword,
+		dbHost,
+		dbPort,
+		dbName,
+		sslMode)
+
+	// Option 2: DSN format (what you're currently using)
+	// dbURL := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+	//     dbHost, dbPort, dbUser, dbPassword, dbName, sslMode)
+
+	log.Printf("Attempting to connect to database at %s", dbHost)
 
 	var err error
 	DB, err = sqlx.Connect("postgres", dbURL)
 	if err != nil {
-		log.Printf("Connection failed. URL: postgres://%s@%s:%s/%s?sslmode=%s",
-			os.Getenv("DB_USER"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"),
-			os.Getenv("DB_NAME"), sslmode)
-		log.Fatal("Database connection error: ", err)
+		// Mask password in error logs for security
+		maskedURL := fmt.Sprintf("postgres://%s:****@%s:%s/%s?sslmode=%s",
+			dbUser, dbHost, dbPort, dbName, sslMode)
+		log.Printf("Connection failed. URL: %s", maskedURL)
+		log.Fatalf("Database connection error: %v", err)
 	}
 
-	// Pool settings (your existing code is good)
+	// Connection pool settings
 	DB.SetMaxOpenConns(25)
 	DB.SetMaxIdleConns(25)
 	DB.SetConnMaxLifetime(5 * time.Minute)
+	DB.SetConnMaxIdleTime(2 * time.Minute)
 
-	// Test connection
+	// Test connection with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := DB.PingContext(ctx); err != nil {
-		log.Fatal("Database ping failed: ", err)
+		log.Fatalf("Database ping failed: %v", err)
 	}
 
-	log.Println("Database connected successfully")
+	log.Println("✅ Database connected successfully")
 }
 
 func CloseDB() error {
