@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Navbar from "../components/Navbar.js";
+import Footer from "../components/Footer.js";
 import Link from "next/link";
 import { FaGraduationCap, FaBriefcase, FaShieldAlt, FaCertificate, FaFileAlt, FaPlane } from "react-icons/fa";
 
@@ -117,7 +118,9 @@ export default function ServicesPage() {
             Get in Touch
           </Link>
         </section>
+
       </main>
+        <Footer/>
     </>
   );
 }

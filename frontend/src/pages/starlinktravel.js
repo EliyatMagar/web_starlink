@@ -1,33 +1,48 @@
 import Head from "next/head";
 import Navbar from "../components/Navbar";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function StarlinkTravels() {
-  const [formData, setFormData] = useState({
-    name: "",
-    countryOfDeparture: "",
-    departureDate: "",
-    arrivalDate: "",
-    departureAirport: "",
-    arrivalAirport: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const form = useRef();
+  const [isSending, setIsSending] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
-    alert("Thank you! We will contact you regarding your travel plan.");
-    setFormData({
-      name: "",
-      countryOfDeparture: "",
-      departureDate: "",
-      arrivalDate: "",
-      departureAirport: "",
-      arrivalAirport: "",
-    });
+    setIsSending(true);
+
+    emailjs
+      .sendForm(
+        "service_78ae49u", // replace with your EmailJS service ID
+        "template_4746wke", // replace with your EmailJS template ID
+        form.current,
+        "I89Ie1HHYVBtU8JW9" // replace with your EmailJS public key
+      )
+      .then(
+        () => {
+          setIsSending(false);
+          toast.success(
+            "Thank you! We will contact you regarding your travel plan.",
+            {
+              position: "top-right",
+              autoClose: 3000,
+              theme: "dark",
+            }
+          );
+          form.current.reset();
+        },
+        (error) => {
+          setIsSending(false);
+          console.error("EmailJS error:", error);
+          toast.error("Failed to send your inquiry. Please try again.", {
+            position: "top-right",
+            autoClose: 3000,
+            theme: "dark",
+          });
+        }
+      );
   };
 
   return (
@@ -41,6 +56,7 @@ export default function StarlinkTravels() {
       </Head>
 
       <Navbar />
+      <ToastContainer />
 
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 pt-24 pb-12">
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,160 +66,216 @@ export default function StarlinkTravels() {
               Starlink Travels Inquiry
             </h1>
             <p className="text-base sm:text-lg text-green-600">
-              Fill in your travel details and we'll get back to you soon with the best options.
+              Fill in your travel details and we'll get back to you soon with
+              the best options.
             </p>
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Travel Information - Hidden on mobile, shown on lg+ */}
+            {/* Travel Information */}
             <div className="hidden lg:block bg-white rounded-xl shadow-lg p-6 h-fit">
               <h2 className="text-xl font-bold text-green-700 mb-4">
                 Why Choose Starlink Travels?
               </h2>
               <ul className="space-y-4">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-700">Competitive flight prices</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-700">24/7 customer support</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-700">Flexible booking options</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-700">Expert travel advice</p>
-                  </div>
-                </li>
+                {[
+                  "Competitive flight prices",
+                  "24/7 customer support",
+                  "Flexible booking options",
+                  "Expert travel advice",
+                ].map((item) => (
+                  <li key={item} className="flex items-start">
+                    <div className="flex-shrink-0 mt-1">
+                      <svg
+                        className="h-5 w-5 text-green-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-gray-700">{item}</p>
+                    </div>
+                  </li>
+                ))}
               </ul>
 
               <div className="mt-8">
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Need immediate assistance?</h3>
-                <p className="text-sm text-gray-600">Call us at: +61 123 456 789</p>
-                <p className="text-sm text-gray-600">Email: travel@starlinkeducation.com</p>
+                <h3 className="text-sm font-medium text-gray-900 mb-2">
+                  Need immediate assistance?
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Call us at: +61 123 456 789
+                </p>
+                <p className="text-sm text-gray-600">
+                  Email: travel@starlinkeducation.com
+                </p>
               </div>
             </div>
 
-            {/* Travel Form - Takes full width on mobile, 2/3 on desktop */}
+            {/* Travel Form */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="p-6 sm:p-8">
                   <h2 className="text-xl sm:text-2xl font-bold text-green-700 mb-6">
                     Travel Inquiry Form
                   </h2>
-                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                  <form
+                    ref={form}
+                    onSubmit={handleSubmit}
+                    className="space-y-4 sm:space-y-6"
+                  >
+                    {/* Full Name */}
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Full Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         id="name"
                         name="name"
-                        value={formData.name}
-                        onChange={handleChange}
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       />
                     </div>
 
+                    {/* Email */}
                     <div>
-                      <label htmlFor="countryOfDeparture" className="block text-sm font-medium text-gray-700 mb-1">
-                        Country of Departure <span className="text-red-500">*</span>
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Email <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="text"
-                        id="countryOfDeparture"
-                        name="countryOfDeparture"
-                        value={formData.countryOfDeparture}
-                        onChange={handleChange}
+                        type="email"
+                        id="email"
+                        name="email"
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       />
                     </div>
 
+                    {/* Contact Number */}
+                    <div>
+                      <label
+                        htmlFor="contactNumber"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Contact Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        id="contactNumber"
+                        name="contactNumber"
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+
+                    {/* Country of Departure */}
+                    {/* Country of Departure */}
+                    <div>
+                      <label
+                        htmlFor="countryOfDeparture"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Country of Departure{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        list="countries"
+                        id="countryOfDeparture"
+                        name="countryOfDeparture"
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        placeholder="Select or type a country"
+                      />
+                      <datalist id="countries">
+                        <option value="Australia" />
+                        <option value="United States" />
+                        <option value="India" />
+                        <option value="Nepal" />
+                        <option value="United Kingdom" />
+                        <option value="Canada" />
+                        {/* Add more countries here */}
+                      </datalist>
+                    </div>
+
+                    {/* Departure Date & Arrival Date */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="departureDate" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label
+                          htmlFor="departureDate"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
                           Departure Date <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="date"
                           id="departureDate"
                           name="departureDate"
-                          value={formData.departureDate}
-                          onChange={handleChange}
                           required
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         />
                       </div>
                       <div>
-                        <label htmlFor="arrivalDate" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label
+                          htmlFor="arrivalDate"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
                           Arrival Date <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="date"
                           id="arrivalDate"
                           name="arrivalDate"
-                          value={formData.arrivalDate}
-                          onChange={handleChange}
                           required
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         />
                       </div>
                     </div>
 
+                    {/* Departure Airport & Arrival Airport */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="departureAirport" className="block text-sm font-medium text-gray-700 mb-1">
-                          Departure Airport <span className="text-red-500">*</span>
+                        <label
+                          htmlFor="departureAirport"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Departure Airport{" "}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           id="departureAirport"
                           name="departureAirport"
-                          value={formData.departureAirport}
-                          onChange={handleChange}
                           required
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         />
                       </div>
                       <div>
-                        <label htmlFor="arrivalAirport" className="block text-sm font-medium text-gray-700 mb-1">
-                          Arrival Airport <span className="text-red-500">*</span>
+                        <label
+                          htmlFor="arrivalAirport"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Arrival Airport{" "}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           id="arrivalAirport"
                           name="arrivalAirport"
-                          value={formData.arrivalAirport}
-                          onChange={handleChange}
                           required
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         />
@@ -213,9 +285,10 @@ export default function StarlinkTravels() {
                     <div className="pt-2">
                       <button
                         type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200"
+                        disabled={isSending}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200 disabled:opacity-50"
                       >
-                        Submit Travel Inquiry
+                        {isSending ? "Sending..." : "Submit Travel Inquiry"}
                       </button>
                     </div>
                   </form>

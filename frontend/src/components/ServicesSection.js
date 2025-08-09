@@ -1,4 +1,6 @@
 // components/ServicesSection.js
+import Link from 'next/link';
+
 export default function ServicesSection() {
   const services = [
     {
@@ -33,7 +35,7 @@ export default function ServicesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {services.map((service, index) => (
             <div 
               key={index}
@@ -49,6 +51,15 @@ export default function ServicesSection() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="text-center">
+          <Link 
+            href="/services" 
+            className="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+          >
+            View All Services
+          </Link>
         </div>
       </div>
     </section>

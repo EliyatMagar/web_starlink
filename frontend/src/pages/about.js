@@ -1,6 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Navbar from "@/components/Navbar";
+
 import { FaGraduationCap, FaGlobeAmericas, FaFileAlt, FaPlane, FaCheck } from "react-icons/fa";
 
 const AboutPage = () => {
