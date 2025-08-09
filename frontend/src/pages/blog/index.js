@@ -3,8 +3,8 @@ import Navbar from "../../components/Navbar";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { blogApi, getImageUrl } from "../../utils/api";
-import { FiCalendar, FiClock, FiArrowRight } from "react-icons/fi";
-import { FaSearch, FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
+import { FiCalendar, FiClock } from "react-icons/fi";
+import Image from "next/image";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState([]);
@@ -14,7 +14,13 @@ export default function BlogPage() {
     async function fetchBlogs() {
       try {
         const data = await blogApi.getAllBlogs();
-        setBlogs(data);
+        // Process blogs with proper dates and image URLs
+        const processedBlogs = data.map(blog => ({
+          ...blog,
+          createdAt: blog.createdAt ? new Date(blog.createdAt) : new Date(), // Fallback to current date if not available
+          imageUrl: blog.image ? getImageUrl(blog.image) : '/default-blog.jpg'
+        }));
+        setBlogs(processedBlogs);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
@@ -23,6 +29,31 @@ export default function BlogPage() {
     }
     fetchBlogs();
   }, []);
+
+  // Improved date formatting function with better error handling
+  function formatDate(date) {
+    try {
+      if (!date) return "Date not available";
+      
+      // Handle both string and Date object inputs
+      const parsedDate = date instanceof Date ? date : new Date(date);
+      
+      if (isNaN(parsedDate.getTime())) {
+        return "Date not available";
+      }
+
+      return parsedDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date not available";
+    }
+  }
 
   return (
     <>
@@ -46,37 +77,49 @@ export default function BlogPage() {
         </section>
 
         {loading ? (
-          <p className="text-center text-gray-500">Loading blogs...</p>
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+          </div>
         ) : blogs.length === 0 ? (
           <p className="text-center text-gray-500">No blogs found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogs.map((post) => (
               <div
-                key={post._id}
-                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                key={post.id}
+                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
               >
-                <img
-                  src={getImageUrl(post.image)}
-                  alt={post.title}
-                  className="w-full h-48 object-cover"
-                />
+                <div className="relative w-full h-48">
+                  <Image
+                    src={post.imageUrl}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/default-blog.jpg";
+                      e.currentTarget.onerror = null;
+                    }}
+                  />
+                </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-800 mb-3">
-                    <Link href={`/blog/${post._id}`} className="hover:text-green-600 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">
+                    <Link 
+                      href={`/blog/${post.id}`} 
+                      className="hover:text-green-600 transition-colors"
+                    >
                       {post.title}
                     </Link>
                   </h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    {post.content?.slice(0, 100)}...
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                    {post.content?.replace(/<[^>]*>?/gm, '').slice(0, 150)}...
                   </p>
                   <div className="flex items-center justify-between text-gray-500 text-xs">
-                    <span>
-                      <FiCalendar className="inline mr-1" />{" "}
-                      {new Date(post.createdAt).toLocaleDateString()}
+                    <span className="flex items-center">
+                      <FiCalendar className="mr-1" />
+                      {formatDate(post.createdAt)}
                     </span>
-                    <span>
-                      <FiClock className="inline mr-1" />{" "}
+                    <span className="flex items-center">
+                      <FiClock className="mr-1" />
                       {post.readTime || "5 min read"}
                     </span>
                   </div>
