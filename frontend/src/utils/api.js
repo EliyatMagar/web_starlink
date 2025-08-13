@@ -79,20 +79,22 @@ export const authApi = {
 };
 
 // Blog API
+
 export const blogApi = {
-  getAllBlogs: async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/blogs`);
-      return handleResponse(response);
-    } catch (error) {
-      console.error('[API] Get all blogs error:', error);
-      throw new Error('Failed to fetch blogs');
-    }
-  },
+getAllBlogs: async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/blogs`);
+    return handleResponse(response);
+  } catch (error) {
+    console.error('[API] Get all blogs error:', error);
+    throw new Error('Failed to fetch blogs');
+  }
+},
+
 
   getBlog: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/blogs/${id}`);
+      const response = await fetch(`${API_BASE_URL}/admin/blogs/${id}`);
       return handleResponse(response);
     } catch (error) {
       console.error('[API] Get blog error:', error);
@@ -161,6 +163,7 @@ export const blogApi = {
     }
   }
 };
+
 
 // Helper functions
 export const storeAuthToken = (token) => {

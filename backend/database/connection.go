@@ -25,7 +25,7 @@ func ConnectDB() {
 	dbName := os.Getenv("DB_NAME")
 	sslMode := os.Getenv("DB_SSLMODE")
 	if sslMode == "" {
-		sslMode = "require" // safer default for production
+		sslMode = "disable" // safer default for production
 	}
 
 	// Two connection string formats - choose one:
