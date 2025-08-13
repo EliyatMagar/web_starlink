@@ -16,10 +16,10 @@ export default function StarlinkTravels() {
 
     emailjs
       .sendForm(
-        "service_78ae49u", // replace with your EmailJS service ID
-        "template_4746wke", // replace with your EmailJS template ID
+        "service_xkeqcap", // replace with your EmailJS service ID
+        "template_n51jiok", // replace with your EmailJS template ID
         form.current,
-        "I89Ie1HHYVBtU8JW9" // replace with your EmailJS public key
+        "H5IjVjxj_09G1yhVo" // replace with your EmailJS public key
       )
       .then(
         () => {
@@ -114,9 +114,9 @@ export default function StarlinkTravels() {
                 <h3 className="text-sm font-medium text-gray-900 mb-2">
                   Need immediate assistance?
                 </h3>
-                <p className="text-sm text-gray-600">Call us at: +61 123 456 789</p>
+                <p className="text-sm text-gray-600">Call us at: +610490887535, ‪+61490887535</p>
                 <p className="text-sm text-gray-600">
-                  Email: travel@starlinkeducation.com
+                  Email: Sydney.starlinktravels@gmail.com
                 </p>
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function StarlinkTravels() {
           </div>
         </main>
       </div>
-      
+
     </>
   );
 }
