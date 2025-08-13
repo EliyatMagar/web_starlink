@@ -176,7 +176,7 @@ export default function ServiceDetailPage() {
                         Call us
                       </p>
                       <p className="text-base font-semibold text-gray-900">
-                        +61 123 456 789
+                        +61490887535
                       </p>
                     </div>
                   </div>
@@ -189,7 +189,7 @@ export default function ServiceDetailPage() {
                         Email us
                       </p>
                       <p className="text-base font-semibold text-gray-900">
-                        travel@starlinkeducation.com
+                        Info@starlinkeducation.com
                       </p>
                     </div>
                   </div>
