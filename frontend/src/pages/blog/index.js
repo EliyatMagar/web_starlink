@@ -3,7 +3,14 @@ import Navbar from "../../components/Navbar";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { blogApi, getImageUrl } from "../../utils/api";
-import { FiCalendar, FiClock, FiArrowRight, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiClock,
+  FiArrowRight,
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+} from "react-icons/fi";
 import Image from "next/image";
 
 export default function BlogPage() {
@@ -29,12 +36,12 @@ export default function BlogPage() {
     async function fetchBlogs() {
       try {
         const data = await blogApi.getAllBlogs();
-        const processedBlogs = data.map(blog => ({
+        const processedBlogs = data.map((blog) => ({
           ...blog,
           createdAt: blog.createdAt ? new Date(blog.createdAt) : new Date(),
-          imageUrl: blog.image ? getImageUrl(blog.image) : '/default-blog.jpg',
+          imageUrl: blog.image ? getImageUrl(blog.image) : "/default-blog.jpg",
           // Add a sample category for demo purposes
-          category: categories[Math.floor(Math.random() * categories.length)]
+          category: categories[Math.floor(Math.random() * categories.length)],
         }));
         setBlogs(processedBlogs);
         setFilteredBlogs(processedBlogs);
@@ -49,24 +56,25 @@ export default function BlogPage() {
 
   useEffect(() => {
     let results = [...blogs];
-    
+
     // Apply search filter
     if (searchQuery) {
-      results = results.filter(blog => 
-        blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        blog.content.toLowerCase().includes(searchQuery.toLowerCase())
+      results = results.filter(
+        (blog) =>
+          blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          blog.content.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
+
     // Apply category filter
     if (selectedCategory) {
-      results = results.filter(blog => 
-        blog.category && blog.category.id === selectedCategory.id
+      results = results.filter(
+        (blog) => blog.category && blog.category.id === selectedCategory.id
       );
     }
-    
+
     // Apply sorting
-    switch(sortOption) {
+    switch (sortOption) {
       case "newest":
         results.sort((a, b) => b.createdAt - a.createdAt);
         break;
@@ -80,7 +88,7 @@ export default function BlogPage() {
       default:
         break;
     }
-    
+
     setFilteredBlogs(results);
     setCurrentPage(1); // Reset to first page when filters change
   }, [blogs, searchQuery, selectedCategory, sortOption]);
@@ -88,9 +96,9 @@ export default function BlogPage() {
   function formatDate(date) {
     try {
       if (!date) return "Date not available";
-      
+
       const parsedDate = date instanceof Date ? date : new Date(date);
-      
+
       if (isNaN(parsedDate.getTime())) {
         return "Date not available";
       }
@@ -123,21 +131,20 @@ export default function BlogPage() {
           content="Expert insights and advice on studying in Australia. Get the latest updates on visas, universities, scholarships, and student life."
         />
       </Head>
-      <Navbar />
+
+      <div className="pt-24 pb-16 bg-green-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Education insight
+          </h1>
+          <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto">
+           Expert advice, latest updates, and helpful guides for your Australian education journey
+          </p>
+        </div>
+      </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         {/* Hero Section */}
-        <section className="relative mb-16 md:mb-20">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-10 rounded-3xl"></div>
-          <div className="relative text-center py-12 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              Education <span className="text-green-600">Insights</span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-              Expert advice, latest updates, and helpful guides for your Australian education journey
-            </p>
-          </div>
-        </section>
 
         {/* Search and Filter Section */}
         <div className="mb-12">
@@ -155,11 +162,14 @@ export default function BlogPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             {/* Sort Dropdown */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
-                <label htmlFor="sort" className="mr-2 text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="sort"
+                  className="mr-2 text-sm font-medium text-gray-700"
+                >
                   Sort by:
                 </label>
                 <select
@@ -175,12 +185,16 @@ export default function BlogPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Category Filters */}
           <div className="mt-6 flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-full text-sm font-medium ${!selectedCategory ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium ${
+                !selectedCategory
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
               All Topics
             </button>
@@ -188,7 +202,11 @@ export default function BlogPage() {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium ${selectedCategory?.id === category.id ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-full text-sm font-medium ${
+                  selectedCategory?.id === category.id
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
                 {category.name}
               </button>
@@ -203,8 +221,10 @@ export default function BlogPage() {
           </div>
         ) : filteredBlogs.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">No articles found matching your criteria.</p>
-            <button 
+            <p className="text-gray-500 text-lg">
+              No articles found matching your criteria.
+            </p>
+            <button
               onClick={() => {
                 setSearchQuery("");
                 setSelectedCategory(null);
@@ -252,18 +272,18 @@ export default function BlogPage() {
                       </span>
                     </div>
                     <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">
-                      <Link 
-                        href={`/blog/${post.id}`} 
+                      <Link
+                        href={`/blog/${post.id}`}
                         className="hover:text-green-600 transition-colors"
                       >
                         {post.title}
                       </Link>
                     </h3>
                     <p className="text-gray-600 text-sm mb-5 line-clamp-3">
-                      {post.content?.replace(/<[^>]*>?/gm, '').slice(0, 150)}...
+                      {post.content?.replace(/<[^>]*>?/gm, "").slice(0, 150)}...
                     </p>
-                    <Link 
-                      href={`/blog/${post.id}`} 
+                    <Link
+                      href={`/blog/${post.id}`}
                       className="inline-flex items-center text-green-600 font-medium text-sm hover:text-green-700 transition-colors"
                     >
                       Read more <FiArrowRight className="ml-1.5" />
@@ -279,25 +299,41 @@ export default function BlogPage() {
                 <button
                   onClick={() => paginate(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-full ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+                  className={`p-2 rounded-full ${
+                    currentPage === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
                 >
                   <FiChevronLeft className="w-5 h-5" />
                 </button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-                  <button
-                    key={number}
-                    onClick={() => paginate(number)}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${currentPage === number ? 'bg-green-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-                  >
-                    {number}
-                  </button>
-                ))}
-                
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (number) => (
+                    <button
+                      key={number}
+                      onClick={() => paginate(number)}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        currentPage === number
+                          ? "bg-green-600 text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {number}
+                    </button>
+                  )
+                )}
+
                 <button
-                  onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    paginate(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-full ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+                  className={`p-2 rounded-full ${
+                    currentPage === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
                 >
                   <FiChevronRight className="w-5 h-5" />
                 </button>

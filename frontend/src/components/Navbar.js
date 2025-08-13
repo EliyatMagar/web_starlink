@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const menuRef = useRef(null);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -12,6 +13,20 @@ export default function Navbar() {
     router.events.on("routeChangeComplete", handleRouteChange);
     return () => router.events.off("routeChangeComplete", handleRouteChange);
   }, [router.events]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -22,7 +37,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed w-full top-0 z-50 bg-white shadow-sm">
+    <nav className="fixed w-full top-0 z-50 bg-white shadow-sm" ref={menuRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -53,7 +68,7 @@ export default function Navbar() {
             ))}
             <Link
               href="/starlinktravel"
-              className="ml-4 px-4 py-2 bg-[#52bf51] text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors border  shadow-sm"
+              className="ml-4 px-4 py-2 bg-[#52bf51] text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors border shadow-sm"
             >
               StarLink Travel
             </Link>
@@ -68,11 +83,27 @@ export default function Navbar() {
               aria-label="Toggle menu"
             >
               <span className="sr-only">Open main menu</span>
-              <div className={`w-6 transform transition-all duration-300 ${open ? "rotate-45 translate-y-1.5" : ""}`}>
-                <div className={`h-0.5 bg-green-600 mb-1.5 ${open ? "w-6" : "w-6"}`}></div>
-                <div className={`h-0.5 bg-green-600 ${open ? "opacity-0" : "opacity-100 w-6"}`}></div>
-                <div className={`h-0.5 bg-green-600 mt-1.5 ${open ? "w-6 -rotate-45 -translate-y-1.5" : "w-6"}`}></div>
-              </div>
+              {open ? (
+                <svg
+                  className="h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg
+                  className="h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
@@ -80,7 +111,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       <div className={`md:hidden ${open ? "block" : "hidden"}`}>
-        <div className="px-4 pb-4 space-y-3 bg-white">
+        <div className="px-4 pb-4 space-y-3 bg-white shadow-md">
           {navLinks.map((link) => (
             <Link
               key={link.href}

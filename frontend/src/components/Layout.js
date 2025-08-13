@@ -1,21 +1,13 @@
-import HeroSection from './Hero';
-import ServicesSection from './ServicesSection';
-import WhyChooseUs from './WhyChooseUs';
-import Testimonials from './Testimonials';
-import BlogSection from './BlogSection';
-import Footer from './Footer';
+// src/components/Layout.js
 import Navbar from './Navbar';
+import Footer from './Footer';
 
-export default function Layout() {
+export default function Layout({ children }) {
   return (
-    <div>
-      <Navbar/>
-      <HeroSection />
-      <ServicesSection />
-      <WhyChooseUs />
-      <Testimonials />
-      <BlogSection />
+    <>
+      <Navbar />
+      <main>{children}</main>
       <Footer />
-    </div>
+    </>
   );
 }

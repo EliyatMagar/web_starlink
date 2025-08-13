@@ -52,6 +52,7 @@ export default function WhyChooseUs() {
           <h3 className="text-xl font-semibold text-green-800 mb-2">
             Ready to start your journey?
           </h3>
+          <p>Contact our experts today for personalized advice on your education and visa options.</p>
           <Link
           href="/contact">
           <button className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium ">

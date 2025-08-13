@@ -1,27 +1,31 @@
-// components/ServicesSection.js
 import Link from 'next/link';
+import { FaGraduationCap, FaBriefcase, FaFileAlt } from 'react-icons/fa';
 
 export default function ServicesSection() {
   const services = [
     {
-      title: "Student Visa Assistance",
-      description: "End-to-end guidance for Australian student visa applications with 98% success rate.",
-      icon: "🎓"
+      slug: "education-counselling",
+      title: "Education Counselling",
+      description: "Personalized guidance for selecting courses and institutions that match your academic goals.",
+      icon: <FaGraduationCap className="text-green-600 text-2xl" />
     },
     {
-      title: "University Admissions",
-      description: "Personalized university shortlisting and application processing.",
-      icon: "🏫"
+      slug: "career-counselling",
+      title: "Career Counselling",
+      description: "Expert advice to align your education with future career opportunities in Australia.",
+      icon: <FaBriefcase className="text-green-600 text-2xl" />
     },
     {
-      title: "SOP & LOR Help",
-      description: "Expert-written Statements of Purpose and Letters of Recommendation.",
-      icon: "✍️"
+      slug: "visa-485-application",
+      title: "485 Visa Application",
+      description: "Professional assistance for your post-study work visa application process.",
+      icon: <FaFileAlt className="text-green-600 text-2xl" />
     },
     {
-      title: "Post-Study Work Visa",
-      description: "Guidance for transitioning from student to work visa.",
-      icon: "🛂"
+      slug: "sop-writing-assistance",
+      title: "SOP Writing Assistance",
+      description: "Expert help crafting compelling Statements of Purpose for your applications.",
+      icon: <FaFileAlt className="text-green-600 text-2xl" />
     }
   ];
 
@@ -35,24 +39,47 @@ export default function ServicesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {services.map((service, index) => (
-            <div 
-              key={index}
-              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+        {/* Services Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {services.map((service) => (
+            <Link
+              key={service.slug}
+              href={`/services/${service.slug}`}
+              className="group block bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:border-green-500"
             >
-              <div className="p-6 text-center">
-                <span className="text-4xl mb-4 inline-block">{service.icon}</span>
-                <h3 className="text-xl font-semibold text-green-700 mb-2">{service.title}</h3>
-                <p className="text-gray-600">{service.description}</p>
-                <button className="mt-4 text-green-600 hover:text-green-800 font-medium">
-                  Learn more →
-                </button>
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="mr-4 p-3 bg-green-50 rounded-lg">
+                    {service.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 group-hover:text-green-600 transition-colors">
+                    {service.title}
+                  </h3>
+                </div>
+                <p className="text-gray-600 mb-4">{service.description}</p>
+                <div className="flex items-center text-green-600 font-medium">
+                  <span>Learn more</span>
+                  <svg
+                    className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
+        {/* View All Services Button */}
         <div className="text-center">
           <Link 
             href="/services" 

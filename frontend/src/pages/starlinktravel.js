@@ -298,7 +298,7 @@ export default function StarlinkTravels() {
           </div>
         </main>
       </div>
-      <Footer/>
+      
     </>
   );
 }

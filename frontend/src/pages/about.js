@@ -22,15 +22,11 @@ const AboutPage = () => {
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/images/starlink-preview.jpg" />
       </Head>
-
-      <Navbar />
-
-      {/* Hero with Gradient */}
-      <div className="bg-gradient-to-r from-[#52bf51] to-emerald-700 py-20 md:py-24 text-white">
+      <div className="bg-green-600  py-20 md:py-24 text-white pt-40">
         <div className="max-w-5xl mx-auto px-6 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">About Our Consultancy</h1>
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">About Us </h1>
           <p className="text-lg md:text-xl opacity-90 max-w-3xl mx-auto">
-            Trusted guidance for your Australian education journey since 2024
+           Trusted Guidance for Your Australian Education Journey
           </p>
         </div>
       </div>
@@ -49,7 +45,7 @@ const AboutPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4 md:p-6 text-white">
-                  <p className="font-medium bg-green-600 border-2 p-2 inline-block">Anup Raj Paudel</p>
+                  <p className="font-medium bg-green-600 border-2 p-2 inline-block ">Anup Raj Paudel</p>
                   <p className="text-sm opacity-90 mt-1">Managing Director</p>
                 </div>
               </div>
@@ -69,7 +65,7 @@ const AboutPage = () => {
                   <strong>Starlink Education and Visa Services</strong> was established in <strong>2024</strong> with a vision to provide ethical, professional guidance for international students pursuing education in Australia.
                 </p>
                 <p className="mt-3 md:mt-4 text-base md:text-lg">
-                  Founded by <strong>Anup Raj Paudel</strong> (ABN: 679958322), our consultancy combines regulatory expertise with personalized service across our offices in <strong>Tasmania</strong> and <strong>Sydney</strong>.
+                  Founded by <strong>Anup Raj Paudel</strong> (QEAC-11357), our consultancy combines regulatory expertise with personalized service across our offices in <strong>Tasmania</strong> and <strong>Sydney</strong>.
                 </p>
                 
                 <div className="mt-6 md:mt-8 p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
@@ -220,7 +216,7 @@ const AboutPage = () => {
           </div>
         </section>
       </main>
-      <Footer/>
+      
     </>
   );
 };

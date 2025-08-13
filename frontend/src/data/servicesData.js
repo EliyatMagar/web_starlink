@@ -1,11 +1,5 @@
 import {
   FaGraduationCap,
-  FaBriefcase,
-  FaShieldAlt,
-  FaCertificate,
-  FaFileAlt,
-  FaPlane,
-  FaHeartbeat,
 } from "react-icons/fa";
 
 export const servicesData = [
@@ -15,7 +9,7 @@ export const servicesData = [
     description:
       "Personalized guidance for selecting courses and institutions that match your academic goals.",
     icon: <FaGraduationCap className="text-green-600 text-3xl" />,
-    image: "/images/hero/hero-section.jpg", // store in public/images/services/
+    image: "/images/hero/hero-section.jpg", 
     details: `
 Australia is home to some of the best education institutes with a vast selection of academic choices available. While choosing a college or university, you must consider the location, fees, campus size, facilities, support services, and other parameters.
 
@@ -50,7 +44,7 @@ We can be your education agent to counsel and guide you through the application 
     title: "Career Counselling",
     description:
       "Expert advice to align your education with future career opportunities in Australia.",
-    icon: <FaBriefcase className="text-green-600 text-3xl" />,
+
     image: "/images/hero/hero-section.jpg",
     details: `
 Career counselling is a professional service dedicated to helping you navigate your academic and professional path—especially vital if you're planning to study or work abroad³⁴.
@@ -79,7 +73,6 @@ Through focused career counselling, you're equipped to make informed decisions, 
     title: "OSHC/OVHC Insurance",
     description:
       "Comprehensive health cover for international students and visitors to meet Australian visa requirements.",
-    icon: <FaHeartbeat className="text-green-600 text-3xl" />,
     image: "/images/hero/hero-section.jpg",
     details: `
 **What is OSHC and OVHC?**  
@@ -113,7 +106,6 @@ With the right OSHC/OVHC cover, you can study, work, or travel in Australia with
     title: "Recognition of Prior Learning (RPL)",
     description:
       "Convert your existing skills, knowledge, and work experience into nationally recognized qualifications in Australia.",
-    icon: <FaCertificate className="text-green-600 text-3xl" />,
     image: "/images/hero/hero-section.jpg",
     details: `
 Recognition of Prior Learning (RPL) is an assessment process that evaluates your existing skills, knowledge, and work experience—whether gained through formal education, informal learning, or on-the-job training—to award you a nationally recognized qualification in Australia.
@@ -152,7 +144,6 @@ RPL transforms your prior learning into a valuable qualification, bridging the g
     title: "485 Visa Application",
     description:
       "Professional assistance for your Temporary Graduate (Subclass 485) visa application to live and work in Australia after your studies.",
-    icon: <FaFileAlt className="text-green-600 text-3xl" />,
     image: "/images/hero/hero-section.jpg",
     details: `
 The Temporary Graduate visa (Subclass 485) allows international students who have recently graduated from an Australian education institution to live, study, and work temporarily in Australia.
@@ -190,7 +181,6 @@ Our expert guidance in your 485 visa application increases the chance of approva
     title: "Student Visa Assistance",
     description:
       "Comprehensive support throughout your Australian student visa application process to maximize approval chances.",
-    icon: <FaFileAlt className="text-green-600 text-3xl" />,
     image: "/images/hero/hero-section.jpg",
     details: `
 Applying for an Australian student visa can be complex, but with our expert assistance, you can navigate the process confidently.
@@ -218,7 +208,6 @@ We simplify the visa application process, reduce errors, and improve your chance
     title: "SOP Writing Assistance",
     description:
       "Expert help to craft compelling Statements of Purpose (SOP) that strengthen your education and visa applications.",
-    icon: <FaFileAlt className="text-green-600 text-3xl" />,
     image: "/images/hero/hero-section.jpg",
     details: `
 A well-written Statement of Purpose (SOP) is crucial for admissions and visa approvals. It reflects your motivation, goals, and suitability for your chosen course.
@@ -245,7 +234,6 @@ A compelling SOP can significantly increase your chances of admission and visa a
     title: "Flight Ticket Assistance",
     description:
       "Support in finding and booking the best flight options for your travel to Australia, ensuring convenience and affordability.",
-    icon: <FaPlane className="text-green-600 text-3xl" />,
     image: "/images/hero/hero-section.jpg",
     details: `
 Planning your flight to Australia is an important step in your journey. Our flight ticket assistance service helps you find the best routes, prices, and travel conditions.

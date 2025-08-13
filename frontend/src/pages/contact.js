@@ -53,7 +53,6 @@ export default function ContactPage() {
         />
       </Head>
 
-      <Navbar />
       <ToastContainer />
 
       {/* Green Background Header Section */}
@@ -291,7 +290,6 @@ export default function ContactPage() {
           </div>
         </main>
       </div>
-      <Footer />
     </>
   );
 }
