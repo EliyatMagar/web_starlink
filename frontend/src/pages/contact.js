@@ -141,7 +141,7 @@ export default function ContactPage() {
                       Sydney Office
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-500">
-                      Sydney, New South Wales – Australia
+                      Sydney, Australia
                     </p>
                   </div>
                 </div>
