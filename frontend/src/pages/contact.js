@@ -193,7 +193,7 @@ export default function ContactPage() {
                       Phone
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-500">
-                      +61 123 456 789
+                      +61490887535
                     </p>
                   </div>
                 </div>

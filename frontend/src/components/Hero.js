@@ -15,7 +15,7 @@ export default function Hero() {
       {/* Content Container */}
       <div className="relative z-10 px-4 sm:px-6 max-w-4xl mx-auto text-white">
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
-          Your Pathway to <span className="text-orange-400">Education Success</span> in Australia
+          Your Pathway to Education Success in Australia
         </h1>
         <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 max-w-2xl mx-auto font-light">
           Expert guidance for international students at every step — from course selection to visa approval

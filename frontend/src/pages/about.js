@@ -54,10 +54,12 @@ const AboutPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4 md:p-6 text-white">
-                  <p className="font-medium bg-green-600 border-2 p-2 inline-block ">
+                  <p className="font-medium bg-green-600 border-2 p-2 inline-block rounded-2xl ">
                     Anup Raj Paudel
                   </p>
-                  <p className="text-sm opacity-90 mt-1">Managing Director</p>
+                  <p className="text-sm opacity-100 mt-1 text-green-7000">
+                    Managing Director
+                  </p>
                 </div>
               </div>
             </div>
@@ -74,15 +76,29 @@ const AboutPage = () => {
               <div className="prose text-gray-600 max-w-2xl">
                 <p className="text-base md:text-lg">
                   <strong>Starlink Education and Visa Services</strong> was
-                  established in <strong>2024</strong> with a vision to provide
-                  ethical, professional guidance for international students
-                  pursuing education in Australia.
+                  founded in
+                  <strong> 2024</strong> in Sydney, Australia, with a vision to
+                  provide ethical, professional guidance for international
+                  students pursuing education in Australia. Today, we proudly
+                  operate from both
+                  <strong> Tasmania</strong> and <strong> Sydney</strong>,
+                  assisting students worldwide in achieving their academic
+                  goals.
                 </p>
+
                 <p className="mt-3 md:mt-4 text-base md:text-lg">
-                  Founded by <strong>Anup Raj Paudel</strong> (QEAC-11357), our
-                  consultancy combines regulatory expertise with personalized
-                  service across our offices in <strong>Tasmania</strong> and{" "}
-                  <strong>Sydney</strong>.
+                  Our founder, <strong>Anup Raj Paudel</strong> (QEAC-11357),
+                  serves as the
+                  <strong> Education Counsellor</strong> and{" "}
+                  <strong>Managing Director</strong>. With regulatory expertise
+                  and a commitment to personalized service, Anup and the team
+                  guide students through every step of their journey.
+                </p>
+
+                <p className="mt-3 md:mt-4 text-base md:text-lg">
+                  We are partnered with multiple leading colleges and
+                  universities across Australia, ensuring our students have
+                  access to the best educational opportunities available.
                 </p>
 
                 <div className="mt-6 md:mt-8 p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
@@ -90,6 +106,22 @@ const AboutPage = () => {
                     "We believe every student deserves accurate information and
                     compassionate guidance when pursuing their academic dreams
                     abroad."
+                  </p>
+                </div>
+
+                <div className="mt-6 text-sm md:text-base">
+                  <p>
+                    <strong>ABN:</strong> 679958322
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> +61490887535
+                  </p>
+                  <p>
+                    <strong>Email:</strong> info@starlinkeducation.com
+                  </p>
+                  <p>
+                    <strong>Locations:</strong> Sydney & Tasmania ,
+                    Australia
                   </p>
                 </div>
               </div>
@@ -235,14 +267,14 @@ const AboutPage = () => {
               location="Tasmania Office"
               address="Rosetta, Tasmania – 7010, Australia"
               hours="Monday-Friday: 9am-5pm"
-              phone="+610490887535, ‪+61490887535"
+              phone="+61490887535"
               image="/images/about/tasmania-office.jpg"
             />
             <OfficeCard
               location="Sydney Office"
               address="Sydney, New South Wales, Australia"
               hours="Monday-Friday: 9am-5pm"
-              phone="+610490887535, ‪+61490887535"
+              phone="+61490887535"
               image="/images/about/sydney-office.jpg"
             />
           </div>

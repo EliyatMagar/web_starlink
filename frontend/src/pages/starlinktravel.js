@@ -114,9 +114,10 @@ export default function StarlinkTravels() {
                 <h3 className="text-sm font-medium text-gray-900 mb-2">
                   Need immediate assistance?
                 </h3>
-                <p className="text-sm text-gray-600">Call us at: +610490887535, ‪+61490887535</p>
+                <p className="text-sm text-gray-600">Call us at: +61490887535</p>
                 <p className="text-sm text-gray-600">
-                  Email: Sydney.starlinktravels@gmail.com
+                  Email:
+                  Sydney.starlinktravels@gmail.com
                 </p>
               </div>
             </div>

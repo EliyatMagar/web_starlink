@@ -58,7 +58,7 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Contact Us</h3>
             <p className="text-green-200">Sydney & Tasmania Offices, Australia</p>
-            <p className="text-green-200">+61 123 456 789</p>
+            <p className="text-green-200">+61490887535</p>
             <p className="text-green-200">info@starlinkeducation.com</p>
           </div>
         </div>
