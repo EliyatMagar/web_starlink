@@ -272,7 +272,7 @@ const AboutPage = () => {
             />
             <OfficeCard
               location="Sydney Office"
-              address="Sydney, New South Wales, Australia"
+              address="Sydney, Australia"
               hours="Monday-Friday: 9am-5pm"
               phone="+61490887535"
               image="/images/about/sydney-office.jpg"
