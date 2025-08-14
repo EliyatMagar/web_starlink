@@ -1,10 +1,10 @@
 package models
 
 type Admin struct {
-	ID       int    `db:"id" json:"id"`
-	Username string `db:"username" json:"username" binding:"required,min=3"`
-	Email    string `db:"email" json:"email" binding:"required,email"`
-	Password string `db:"password" json:"password,omitempty" binding:"required,min=6"`
+	ID       uint   `gorm:"primaryKey;autoIncrement" json:"id"`
+	Username string `gorm:"size:100;not null" json:"username"`
+	Email    string `gorm:"size:100;not null;unique" json:"email"`
+	Password string `gorm:"size:255;not null" json:"password"`
 }
 
 type LoginRequest struct {

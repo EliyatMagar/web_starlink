@@ -3,10 +3,7 @@ package controllers
 import (
 	"backend/database"
 	"backend/models"
-	"database/sql"
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -17,20 +14,42 @@ import (
 	"github.com/google/uuid"
 )
 
-const uploadDir = "./uploads"
+const (
+	uploadDir      = "./uploads"
+	maxUploadSize  = 8 << 20 // 8 MB
+	allowedFormats = ".jpg,.jpeg,.png,.gif"
+)
 
 func init() {
-	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-		os.Mkdir(uploadDir, 0755)
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		panic("Failed to create upload directory: " + err.Error())
 	}
 }
 
+// CreateBlog creates a new blog post
 func CreateBlog(c *gin.Context) {
-	adminID := c.MustGet("adminID").(int)
+	adminID, err := getAdminID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Admin authentication required"})
+		return
+	}
 
-	var blogRequest models.BlogCreateRequest
-	if err := c.ShouldBind(&blogRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.Request.ParseMultipartForm(maxUploadSize); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File too large (max 8MB)"})
+		return
+	}
+
+	// Get form values directly instead of using ShouldBind
+	title := c.PostForm("title")
+	content := c.PostForm("content")
+
+	// Validate required fields
+	if title == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Title is required"})
+		return
+	}
+	if content == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Content is required"})
 		return
 	}
 
@@ -41,6 +60,11 @@ func CreateBlog(c *gin.Context) {
 	}
 
 	ext := filepath.Ext(file.Filename)
+	if !isAllowedExtension(ext) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file format. Allowed: " + allowedFormats})
+		return
+	}
+
 	newFilename := uuid.New().String() + ext
 	filePath := filepath.Join(uploadDir, newFilename)
 
@@ -49,47 +73,36 @@ func CreateBlog(c *gin.Context) {
 		return
 	}
 
+	// Create blog struct directly with validated data
 	blog := models.Blog{
-		Title:     blogRequest.Title,
-		Content:   blogRequest.Content,
-		Image:     &newFilename, // Store as pointer
+		Title:     title,
+		Content:   content,
+		Image:     &newFilename,
 		AdminID:   adminID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
-	_, err = database.DB.NamedExec(`
-        INSERT INTO blogs (title, content, image, admin_id, created_at, updated_at)
-        VALUES (:title, :content, :image, :admin_id, :created_at, :updated_at)`,
-		blog)
-
-	if err != nil {
+	if err := database.DB.Create(&blog).Error; err != nil {
 		os.Remove(filePath)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create blog"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Blog created successfully"})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Blog created successfully",
+		"blog":    blog,
+	})
 }
 
+// GetBlogs returns all blogs
 func GetBlogs(c *gin.Context) {
 	var blogs []models.Blog
-
-	err := database.DB.Select(&blogs, `
-        SELECT b.*, a.username as admin_username 
-        FROM blogs b
-        LEFT JOIN admins a ON b.admin_id = a.id
-        ORDER BY b.created_at DESC`)
-	if err != nil {
-		log.Printf("Database error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to fetch blogs",
-			"details": err.Error(),
-		})
+	if err := database.DB.Preload("Admin").Order("created_at DESC").Find(&blogs).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch blogs"})
 		return
 	}
 
-	// Generate full image URLs
 	for i := range blogs {
 		if blogs[i].Image != nil {
 			imagePath := "/uploads/" + *blogs[i].Image
@@ -100,37 +113,17 @@ func GetBlogs(c *gin.Context) {
 	c.JSON(http.StatusOK, blogs)
 }
 
+// GetBlog returns a single blog by ID
 func GetBlog(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid ID format",
-			"details": "ID must be a number",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
-	log.Printf("Fetching blog with ID: %d", id)
-
 	var blog models.Blog
-	err = database.DB.Get(&blog, `
-        SELECT b.*, a.username as admin_username 
-        FROM blogs b
-        LEFT JOIN admins a ON b.admin_id = a.id
-        WHERE b.id = $1`, id)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": fmt.Sprintf("Blog with ID %d not found", id),
-			})
-		} else {
-			log.Printf("Database error: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to fetch blog",
-			})
-		}
+	if err := database.DB.Preload("Admin").First(&blog, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Blog not found"})
 		return
 	}
 
@@ -142,40 +135,45 @@ func GetBlog(c *gin.Context) {
 	c.JSON(http.StatusOK, blog)
 }
 
+// UpdateBlog updates an existing blog
 func UpdateBlog(c *gin.Context) {
-	adminID := c.MustGet("adminID").(int)
-	id := c.Param("id")
-
-	var blogAdminID int
-	err := database.DB.Get(&blogAdminID, "SELECT admin_id FROM blogs WHERE id = $1", id)
-	if err != nil || blogAdminID != adminID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to update this blog"})
-		return
-	}
-
-	var blogRequest models.BlogUpdateRequest
-	if err := c.ShouldBind(&blogRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var currentBlog models.Blog
-	err = database.DB.Get(&currentBlog, "SELECT * FROM blogs WHERE id = $1", id)
+	adminID, err := getAdminID(c)
 	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Admin authentication required"})
+		return
+	}
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var blog models.Blog
+	if err := database.DB.First(&blog, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Blog not found"})
 		return
 	}
 
-	updateData := map[string]interface{}{
-		"title":    blogRequest.Title,
-		"content":  blogRequest.Content,
-		"id":       id,
-		"admin_id": adminID,
+	if blog.AdminID != adminID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to update this blog"})
+		return
+	}
+
+	var updateData models.Blog
+	if err := c.ShouldBind(&updateData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	file, err := c.FormFile("image")
 	if err == nil {
 		ext := filepath.Ext(file.Filename)
+		if !isAllowedExtension(ext) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file format"})
+			return
+		}
+
 		newFilename := uuid.New().String() + ext
 		filePath := filepath.Join(uploadDir, newFilename)
 
@@ -184,64 +182,96 @@ func UpdateBlog(c *gin.Context) {
 			return
 		}
 
-		updateData["image"] = newFilename
+		if blog.Image != nil && *blog.Image != "" {
+			oldPath := filepath.Join(uploadDir, *blog.Image)
+			if err := os.Remove(oldPath); err != nil && !os.IsNotExist(err) {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove old image"})
+				return
+			}
+		}
 
-		// Delete old image if exists
-		if currentBlog.Image != nil && *currentBlog.Image != "" {
-			oldFilePath := filepath.Join(uploadDir, *currentBlog.Image)
-			os.Remove(oldFilePath)
-		}
+		updateData.Image = &newFilename
 	} else {
-		// Keep existing image
-		if currentBlog.Image != nil {
-			updateData["image"] = *currentBlog.Image
-		} else {
-			updateData["image"] = nil
-		}
+		updateData.Image = blog.Image
 	}
 
-	_, err = database.DB.NamedExec(`
-        UPDATE blogs 
-        SET title = :title, content = :content, image = :image, updated_at = NOW()
-        WHERE id = :id AND admin_id = :admin_id`,
-		updateData)
+	updateData.UpdatedAt = time.Now()
 
-	if err != nil {
+	if err := database.DB.Model(&blog).Updates(updateData).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update blog"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Blog updated successfully"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Blog updated successfully",
+		"blog":    blog,
+	})
 }
 
+// DeleteBlog deletes a blog post
 func DeleteBlog(c *gin.Context) {
-	adminID := c.MustGet("adminID").(int)
-	id := c.Param("id")
+	adminID, err := getAdminID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Admin authentication required"})
+		return
+	}
 
-	var blogAdminID int
-	err := database.DB.Get(&blogAdminID, "SELECT admin_id FROM blogs WHERE id = $1", id)
-	if err != nil || blogAdminID != adminID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to delete this blog"})
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	var blog models.Blog
-	err = database.DB.Get(&blog, "SELECT * FROM blogs WHERE id = $1", id)
-	if err != nil {
+	if err := database.DB.First(&blog, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Blog not found"})
 		return
 	}
 
-	_, err = database.DB.Exec("DELETE FROM blogs WHERE id = $1 AND admin_id = $2", id, adminID)
-	if err != nil {
+	if blog.AdminID != adminID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to delete this blog"})
+		return
+	}
+
+	if err := database.DB.Delete(&blog).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete blog"})
 		return
 	}
 
 	if blog.Image != nil && *blog.Image != "" {
-		filePath := filepath.Join(uploadDir, *blog.Image)
-		os.Remove(filePath)
+		imagePath := filepath.Join(uploadDir, *blog.Image)
+		if err := os.Remove(imagePath); err != nil && !os.IsNotExist(err) {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Blog deleted but failed to remove image",
+				"error":   err.Error(),
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Blog deleted successfully"})
+}
+
+func getAdminID(c *gin.Context) (uint, error) {
+	adminIDValue, exists := c.Get("adminID")
+	if !exists {
+		return 0, errors.New("adminID not found")
+	}
+
+	adminID, ok := adminIDValue.(uint)
+	if !ok {
+		return 0, errors.New("invalid adminID type")
+	}
+
+	return adminID, nil
+}
+
+func isAllowedExtension(ext string) bool {
+	allowed := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".gif":  true,
+	}
+	return allowed[ext]
 }

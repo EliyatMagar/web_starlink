@@ -1,3 +1,4 @@
+// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -6,12 +7,11 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '8080',
-        pathname: '/api/uploads/**',
+        pathname: '/uploads/**',
       },
     ],
+    unoptimized: process.env.NODE_ENV === 'development',
   },
-  // Optional: Add if you need to handle other domains in the future
-  // domains: ['yourdomain.com'],
 };
 
 export default nextConfig;

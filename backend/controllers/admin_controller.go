@@ -4,7 +4,6 @@ import (
 	"backend/database"
 	"backend/models"
 	"backend/utils"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,18 +18,13 @@ func AdminSignup(c *gin.Context) {
 	}
 
 	// Check if email already exists
-	var count int
-	err := database.DB.Get(&count, "SELECT COUNT(*) FROM admins WHERE email=$1", admin.Email)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		return
-	}
-	if count > 0 {
+	var existing models.Admin
+	if err := database.DB.Where("email = ?", admin.Email).First(&existing).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already registered"})
 		return
 	}
 
-	// Hash password with proper error handling
+	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash password"})
@@ -38,16 +32,9 @@ func AdminSignup(c *gin.Context) {
 	}
 	admin.Password = string(hashedPassword)
 
-	// Save to DB with better error handling
-	_, err = database.DB.NamedExec(`
-		INSERT INTO admins (username, email, password) 
-		VALUES (:username, :email, :password)`, &admin)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to register admin",
-			"details": err.Error(),
-		})
+	// Save admin
+	if err := database.DB.Create(&admin).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register admin", "details": err.Error()})
 		return
 	}
 
@@ -57,38 +44,30 @@ func AdminSignup(c *gin.Context) {
 func AdminLogin(c *gin.Context) {
 	var input models.LoginRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Login - Input error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 		return
 	}
 
-	log.Printf("Login attempt for email: %s", input.Email)
-
+	// Find admin by email
 	var admin models.Admin
-	err := database.DB.Get(&admin, "SELECT id, username, email, password FROM admins WHERE email = $1", input.Email)
-	if err != nil {
-		log.Printf("Login - Database error: %v", err)
+	if err := database.DB.Where("email = ?", input.Email).First(&admin).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
-	log.Printf("Found admin: %+v", admin)
-
-	err = bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(input.Password))
-	if err != nil {
-		log.Printf("Login - Password mismatch: %v", err)
+	// Compare password
+	if err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(input.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
+	// Generate JWT token (admin.ID is now uint)
 	token, err := utils.GenerateToken(admin.ID)
 	if err != nil {
-		log.Printf("Login - Token generation error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
-	log.Printf("Login successful for admin ID: %d", admin.ID)
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"admin": gin.H{

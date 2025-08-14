@@ -30,13 +30,29 @@ func AdminRoutes(r *gin.RouterGroup) {
 		protected.POST("/blogs", controllers.CreateBlog)
 		protected.PUT("/blogs/:id", controllers.UpdateBlog)
 		protected.DELETE("/blogs/:id", controllers.DeleteBlog)
-
 	}
 }
 
 // adminDashboard handles the admin dashboard route
 func adminDashboard(c *gin.Context) {
-	adminID := c.MustGet("adminID").(int)
+	// Safely get adminID with type checking
+	adminIDValue, exists := c.Get("adminID")
+	if !exists {
+		c.JSON(400, gin.H{"error": "adminID not found in context"})
+		return
+	}
+
+	var adminID int
+	switch v := adminIDValue.(type) {
+	case uint:
+		adminID = int(v) // Convert uint to int if needed
+	case int:
+		adminID = v
+	default:
+		c.JSON(500, gin.H{"error": "invalid adminID type"})
+		return
+	}
+
 	c.JSON(200, gin.H{
 		"message": "Welcome to admin dashboard",
 		"adminID": adminID,

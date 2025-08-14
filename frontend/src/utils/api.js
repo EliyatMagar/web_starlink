@@ -1,187 +1,314 @@
-// utils/api.js
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api';
 
-async function handleResponse(response) {
-  // First check if response exists
-  if (!response) {
-    throw new Error('No response from server - check your network connection');
-  }
-
-  // Handle non-JSON responses
-  const contentType = response.headers.get('content-type');
-  if (!contentType || !contentType.includes('application/json')) {
-    const text = await response.text();
-    throw new Error(`Invalid response format: ${text}`);
-  }
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    console.error('API Error Response:', {
-      status: response.status,
-      data: data
+const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      credentials: 'include'
     });
-    throw new Error(data.message || `Request failed with status ${response.status}`);
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    const errorMessage = error.name === 'AbortError' ? 'Request timeout' : 
+                       error.message || 'Network request failed';
+    throw new Error(errorMessage);
   }
-
-  return data;
-}
-
-export const getImageUrl = (imagePath) => {
-  if (!imagePath) return '/default-blog.jpg';
-  
-  // Remove any leading slashes or duplicate uploads paths
-  const cleanPath = imagePath
-    .replace(/^\/+/, '')
-    .replace(/^uploads\//, '')
-    .replace(/^\/?api\/uploads\//, '');
-  
-  return `${API_BASE_URL}/uploads/${cleanPath}`;
 };
 
+async function handleResponse(response) {
+  if (!response) {
+    throw new Error('No response from server');
+  }
 
-// Auth API
-export const authApi = {
-  login: async (credentials) => {
-    try {
-      console.log('[API] Login request to:', `${API_BASE_URL}/admin/login`);
+  // Clone the response for fallback
+  const responseClone = response.clone();
+  
+  try {
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType?.includes('application/json');
+    
+    if (isJson) {
+      const data = await response.json();
       
-      const response = await fetch(`${API_BASE_URL}/admin/login`, {
+      if (!response.ok) {
+        // Enhanced error handling for 400 responses
+        if (response.status === 400) {
+          // Extract validation errors if available
+          const validationErrors = data.errors 
+            ? Object.entries(data.errors).map(([field, messages]) => (
+                `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`
+              )).join('\n')
+            : data.message || 'Invalid request data';
+          
+          const error = new Error(validationErrors);
+          error.status = response.status;
+          error.data = data;
+          throw error;
+        }
+        
+        // Handle other error statuses
+        const error = new Error(data.message || `Request failed with status ${response.status}`);
+        error.status = response.status;
+        error.data = data;
+        throw error;
+      }
+      
+      return data;
+    }
+    
+    // Handle non-JSON responses
+    const textData = await response.text();
+    if (!response.ok) {
+      throw new Error(textData || `Request failed with status ${response.status}`);
+    }
+    return textData;
+    
+  } catch (error) {
+    // Handle JSON parsing errors
+    if (error instanceof SyntaxError) {
+      const textData = await responseClone.text();
+      if (!response.ok) {
+        throw new Error(textData || `Request failed with status ${response.status}`);
+      }
+      return textData;
+    }
+    throw error;
+  }
+}
+
+export const adminApi = {
+  login: async ({ email, password }) => {
+    try {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(credentials),
+        body: JSON.stringify({ email, password }),
       });
-
-      console.log('[API] Login response status:', response.status);
       return handleResponse(response);
     } catch (error) {
-      console.error('[API] Network error:', error);
-      throw new Error('Failed to connect to server. Please try again.');
+      if (error.message.includes('Failed to fetch')) {
+        throw new Error('Cannot connect to server. Please check your network connection.');
+      }
+      throw error;
     }
   },
 
-  verifyAuth: async (token) => {
+  verifySession: async (token) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/admin/verify-session`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
       });
+      
+      if (response.status === 404) {
+        const testResponse = await fetchWithTimeout(`${API_BASE_URL}/admin/blogs`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        return { valid: testResponse.ok, adminID: 'default-admin' };
+      }
+      
       return handleResponse(response);
     } catch (error) {
-      console.error('[API] Auth verification error:', error);
-      throw new Error('Failed to verify authentication');
+      console.error('Session verification error:', error);
+      return { valid: false };
     }
   }
 };
 
-// Blog API
+export const adminToken = {
+  store: (token) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('adminToken', token);
+    }
+  },
+  get: () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('adminToken');
+    }
+    return null;
+  },
+  remove: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('adminToken');
+    }
+  }
+};
+
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return '/default-blog.jpg';
+  if (imagePath.startsWith('http')) return imagePath;
+  
+  const cleanPath = imagePath
+    .replace(/^\/+/, '')
+    .replace(/\\/g, '/')
+    .replace(/\/+/g, '/');
+
+  const finalPath = cleanPath.includes('uploads/') 
+    ? cleanPath 
+    : `uploads/${cleanPath}`;
+
+  return `${API_BASE_URL.replace('/api', '')}/${finalPath}`;
+};
 
 export const blogApi = {
-getAllBlogs: async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/blogs`);
-    return handleResponse(response);
-  } catch (error) {
-    console.error('[API] Get all blogs error:', error);
-    throw new Error('Failed to fetch blogs');
-  }
-},
-
-
-  getBlog: async (id) => {
+  getAllBlogs: async (requireAuth = false) => {
+    const headers = {};
+    const token = adminToken.get();
+    
+    if (requireAuth) {
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    headers['Content-Type'] = 'application/json';
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/blogs/${id}`);
+      const response = await fetchWithTimeout(`${API_BASE_URL}/admin/blogs`, { headers });
       return handleResponse(response);
     } catch (error) {
-      console.error('[API] Get blog error:', error);
-      throw new Error(`Failed to fetch blog with ID ${id}`);
+      throw error;
     }
   },
 
-  createBlog: async (blogData, token) => {
+  getBlog: async (id, requireAuth = false) => {
+    if (!id) {
+      throw new Error('Blog post ID is required');
+    }
+
+    const headers = {};
+    const token = adminToken.get();
+    
+    if (requireAuth) {
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    headers['Content-Type'] = 'application/json';
+
+    try {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/admin/blogs/${id}`, { headers });
+      return handleResponse(response);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createBlog: async (blogData) => {
+    const token = adminToken.get();
+    if (!token) {
+      throw new Error('Authentication required. Please login again.');
+    }
+
     try {
       const formData = new FormData();
       formData.append('title', blogData.title);
       formData.append('content', blogData.content);
+      
       if (blogData.image) {
         formData.append('image', blogData.image);
       }
 
-      const response = await fetch(`${API_BASE_URL}/admin/blogs`, {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/admin/blogs`, {
         method: 'POST',
-        headers: {
+        headers: { 
           'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
+      
       return handleResponse(response);
     } catch (error) {
-      console.error('[API] Create blog error:', error);
-      throw new Error('Failed to create blog');
+      if (error.message.includes('Invalid request data') && error.data) {
+        error.message = `Validation failed: ${JSON.stringify(error.data)}`;
+      }
+      throw error;
     }
   },
 
-  updateBlog: async (id, blogData, token) => {
+  updateBlog: async (id, blogData) => {
+    if (!id) {
+      throw new Error('Blog post ID is required');
+    }
+
+    const token = adminToken.get();
+    if (!token) {
+      throw new Error('Authentication required. Please login again.');
+    }
+
     try {
       const formData = new FormData();
       formData.append('title', blogData.title);
       formData.append('content', blogData.content);
+      
       if (blogData.image) {
         formData.append('image', blogData.image);
       }
 
-      const response = await fetch(`${API_BASE_URL}/admin/blogs/${id}`, {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/admin/blogs/${id}`, {
         method: 'PUT',
-        headers: {
+        headers: { 
           'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
+      
       return handleResponse(response);
     } catch (error) {
-      console.error('[API] Update blog error:', error);
-      throw new Error(`Failed to update blog with ID ${id}`);
+      throw error;
     }
   },
 
-  deleteBlog: async (id, token) => {
+  deleteBlog: async (id) => {
+    if (!id) {
+      throw new Error('Blog post ID is required');
+    }
+
+    const token = adminToken.get();
+    if (!token) {
+      throw new Error('Authentication required. Please login again.');
+    }
+
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/blogs/${id}`, {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/admin/blogs/${id}`, {
         method: 'DELETE',
-        headers: {
+        headers: { 
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
       });
-      return handleResponse(response);
+
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.message?.includes('CSRF')) {
+          throw new Error('CSRF token validation failed. Please refresh and try again.');
+        }
+        throw new Error(errorData.message || 'You do not have permission to delete this blog');
+      }
+
+      const result = await handleResponse(response);
+      return { 
+        success: true,
+        deletedId: id,
+        ...result 
+      };
     } catch (error) {
-      console.error('[API] Delete blog error:', error);
-      throw new Error(`Failed to delete blog with ID ${id}`);
+      console.error('Delete blog error:', error);
+      throw new Error(error.message || 'Failed to delete blog. Please try again.');
     }
   }
 };
-
-
-// Helper functions
-export const storeAuthToken = (token) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('authToken', token);
-  }
-};
-
-export const getAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken');
-  }
-  return null;
-};
-
-export const removeAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('authToken');
-  }
-};
-

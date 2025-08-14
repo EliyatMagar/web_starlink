@@ -17,7 +17,8 @@ func InitJWT() {
 	jwtSecret = []byte(secret)
 }
 
-func GenerateToken(adminID int) (string, error) {
+// Changed adminID type to uint
+func GenerateToken(adminID uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"admin_id": adminID,
 		"exp":      time.Now().Add(24 * time.Hour).Unix(),

@@ -22,7 +22,7 @@ export default function BlogPage() {
   const [sortOption, setSortOption] = useState("newest");
   const postsPerPage = 6;
 
-  // Sample categories - you would fetch these from your API in a real app
+  // Sample categories
   const categories = [
     { id: 1, name: "Visa Information" },
     { id: 2, name: "University Guides" },
@@ -39,9 +39,14 @@ export default function BlogPage() {
         const processedBlogs = data.map((blog) => ({
           ...blog,
           createdAt: blog.createdAt ? new Date(blog.createdAt) : new Date(),
+<<<<<<< Updated upstream
           imageUrl: blog.image ? getImageUrl(blog.image) : "/default-blog.jpg",
           // Add a sample category for demo purposes
           category: categories[Math.floor(Math.random() * categories.length)],
+=======
+          imageUrl: blog.image ? getImageUrl(blog.image) : '/default-blog.jpg',
+          category: categories[Math.floor(Math.random() * categories.length)]
+>>>>>>> Stashed changes
         }));
         setBlogs(processedBlogs);
         setFilteredBlogs(processedBlogs);
@@ -56,8 +61,12 @@ export default function BlogPage() {
 
   useEffect(() => {
     let results = [...blogs];
+<<<<<<< Updated upstream
 
     // Apply search filter
+=======
+    
+>>>>>>> Stashed changes
     if (searchQuery) {
       results = results.filter(
         (blog) =>
@@ -65,16 +74,25 @@ export default function BlogPage() {
           blog.content.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
+<<<<<<< Updated upstream
 
     // Apply category filter
+=======
+    
+>>>>>>> Stashed changes
     if (selectedCategory) {
       results = results.filter(
         (blog) => blog.category && blog.category.id === selectedCategory.id
       );
     }
+<<<<<<< Updated upstream
 
     // Apply sorting
     switch (sortOption) {
+=======
+    
+    switch(sortOption) {
+>>>>>>> Stashed changes
       case "newest":
         results.sort((a, b) => b.createdAt - a.createdAt);
         break;
@@ -82,7 +100,6 @@ export default function BlogPage() {
         results.sort((a, b) => a.createdAt - b.createdAt);
         break;
       case "popular":
-        // Assuming we have a views property
         results.sort((a, b) => (b.views || 0) - (a.views || 0));
         break;
       default:
@@ -90,7 +107,7 @@ export default function BlogPage() {
     }
 
     setFilteredBlogs(results);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [blogs, searchQuery, selectedCategory, sortOption]);
 
   function formatDate(date) {

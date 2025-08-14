@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { blogApi, getAuthToken, getImageUrl } from '@/utils/api';
+import { blogApi, adminToken, getImageUrl } from '@/utils/api';
 
 export default function EditBlogPage() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function EditBlogPage() {
     setError('');
 
     try {
-      const token = getAuthToken();
+      const token = adminToken.get();
       if (!token) {
         throw new Error('Not authenticated');
       }

@@ -40,7 +40,10 @@ func validateEnvVars() {
 func cleanupOrigins(origins []string) []string {
 	var cleaned []string
 	for _, origin := range origins {
-		cleaned = append(cleaned, strings.TrimSpace(strings.TrimRight(origin, "/")))
+		trimmed := strings.TrimSpace(strings.TrimRight(origin, "/"))
+		if trimmed != "" {
+			cleaned = append(cleaned, trimmed)
+		}
 	}
 	return cleaned
 }
@@ -98,30 +101,40 @@ func main() {
 
 	// CORS configuration
 	if os.Getenv("GIN_MODE") != "release" {
+		// Development configuration
 		router.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"*"},
-			AllowMethods:     []string{"*"},
-			AllowHeaders:     []string{"*"},
+			AllowOrigins:     []string{"http://localhost:3000"}, // Your frontend URL
+			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
 			AllowCredentials: true,
 			MaxAge:           12 * time.Hour,
 		}))
 	} else {
+		// Production configuration
 		allowedOrigins := cleanupOrigins(strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","))
 		allowedMethods := strings.Split(os.Getenv("ALLOWED_METHODS"), ",")
 		allowedHeaders := strings.Split(os.Getenv("ALLOWED_HEADERS"), ",")
 
-		for i := range allowedMethods {
-			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
+		// Clean up methods and headers
+		var cleanMethods []string
+		for _, method := range allowedMethods {
+			if m := strings.TrimSpace(method); m != "" {
+				cleanMethods = append(cleanMethods, m)
+			}
 		}
-		for i := range allowedHeaders {
-			allowedHeaders[i] = strings.TrimSpace(allowedHeaders[i])
+
+		var cleanHeaders []string
+		for _, header := range allowedHeaders {
+			if h := strings.TrimSpace(header); h != "" {
+				cleanHeaders = append(cleanHeaders, h)
+			}
 		}
 
 		router.Use(cors.New(cors.Config{
 			AllowOrigins:     allowedOrigins,
-			AllowMethods:     allowedMethods,
-			AllowHeaders:     allowedHeaders,
+			AllowMethods:     cleanMethods,
+			AllowHeaders:     cleanHeaders,
 			ExposeHeaders:    []string{"Content-Length"},
 			AllowCredentials: true,
 			MaxAge:           12 * time.Hour,
@@ -142,12 +155,21 @@ func main() {
 		})
 	})
 
-	// Health check endpoint with DB verification
+	// Health check endpoint with GORM
 	router.GET("/health", func(c *gin.Context) {
+		sqlDB, err := database.DB.DB()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"details": err.Error(),
+			})
+			return
+		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
-		if err := database.DB.PingContext(ctx); err != nil {
+		if err := sqlDB.PingContext(ctx); err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"status":  "unhealthy",
 				"error":   err.Error(),
@@ -165,15 +187,16 @@ func main() {
 	// Setup API routes
 	api := router.Group("/api")
 	{
-		// Admin routes
 		routes.AdminRoutes(api)
-
 		// Add other route groups here
-		// routes.UserRoutes(api)
-		// routes.AuthRoutes(api)
 	}
 
-	// Serve static files (should come after API routes)
+	// Handle OPTIONS for all routes
+	router.OPTIONS("/*any", func(c *gin.Context) {
+		c.AbortWithStatus(http.StatusNoContent)
+	})
+
+	// Serve static files
 	router.Static("/uploads", "./uploads")
 
 	// Set trusted proxies if configured
@@ -198,11 +221,10 @@ func main() {
 		Handler: router,
 	}
 
-	// Graceful shutdown setup
+	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	// Run server in goroutine
 	go func() {
 		log.Printf("Server starting on port %s", port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -210,15 +232,11 @@ func main() {
 		}
 	}()
 
-	// Block until signal is received
 	<-quit
 	log.Println("Shutting down server...")
 
-	// Create context with timeout for shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	// Shutdown the server gracefully
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
