@@ -39,14 +39,14 @@ export default function BlogPage() {
         const processedBlogs = data.map((blog) => ({
           ...blog,
           createdAt: blog.createdAt ? new Date(blog.createdAt) : new Date(),
-<<<<<<< Updated upstream
+
           imageUrl: blog.image ? getImageUrl(blog.image) : "/default-blog.jpg",
           // Add a sample category for demo purposes
           category: categories[Math.floor(Math.random() * categories.length)],
-=======
+
           imageUrl: blog.image ? getImageUrl(blog.image) : '/default-blog.jpg',
           category: categories[Math.floor(Math.random() * categories.length)]
->>>>>>> Stashed changes
+
         }));
         setBlogs(processedBlogs);
         setFilteredBlogs(processedBlogs);
@@ -61,12 +61,11 @@ export default function BlogPage() {
 
   useEffect(() => {
     let results = [...blogs];
-<<<<<<< Updated upstream
+
 
     // Apply search filter
-=======
     
->>>>>>> Stashed changes
+
     if (searchQuery) {
       results = results.filter(
         (blog) =>
@@ -74,25 +73,15 @@ export default function BlogPage() {
           blog.content.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-<<<<<<< Updated upstream
 
-    // Apply category filter
-=======
-    
->>>>>>> Stashed changes
     if (selectedCategory) {
       results = results.filter(
         (blog) => blog.category && blog.category.id === selectedCategory.id
       );
     }
-<<<<<<< Updated upstream
 
-    // Apply sorting
-    switch (sortOption) {
-=======
-    
     switch(sortOption) {
->>>>>>> Stashed changes
+
       case "newest":
         results.sort((a, b) => b.createdAt - a.createdAt);
         break;
