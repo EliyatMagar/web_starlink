@@ -1,16 +1,14 @@
-// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8080',
+        protocol: 'https',
+        hostname: 'web-starlink.onrender.com',
         pathname: '/uploads/**',
       },
     ],
-    unoptimized: process.env.NODE_ENV === 'development',
+    unoptimized: process.env.NODE_ENV === 'development', // keep dev unoptimized
   },
 };
 
