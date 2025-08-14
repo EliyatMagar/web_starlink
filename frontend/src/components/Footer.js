@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { servicesData } from "@/data/servicesData";
+import { FaFacebookF, FaWhatsapp } from "react-icons/fa"; // added icons
 
 export default function Footer() {
   return (
@@ -11,7 +12,7 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Starlink Education</h3>
             <p className="text-green-100">
-              Expert education and visa services helping students achieve their Australian study dreams since 2024.
+              Expert in education and visa services helping students achieve their Australian study dreams since 2024.
             </p>
           </div>
 
@@ -60,12 +61,32 @@ export default function Footer() {
             <p className="text-green-200">Sydney & Tasmania Offices, Australia</p>
             <p className="text-green-200">+61490887535</p>
             <p className="text-green-200">info@starlinkeducation.com</p>
+
+            {/* Social Icons */}
+            <div className="flex space-x-4 mt-4">
+              <a
+                href="https://www.facebook.com/starlinkeducationandvisaservices"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-200 hover:text-white text-xl"
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://wa.me/61490887535"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-200 hover:text-white text-xl"
+              >
+                <FaWhatsapp />
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="bg-green-900 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm flex justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-green-300">&copy; {new Date().getFullYear()} Starlink Education & Visa Services</p>
           <div className="flex space-x-4">
             <Link href="/privacy" className="text-green-300 hover:text-white">Privacy Policy</Link>
@@ -73,8 +94,6 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      
     </footer>
-    
   );
 }
